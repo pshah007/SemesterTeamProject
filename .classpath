@@ -9,9 +9,10 @@
 	<classpathentry kind="lib" path="D:/eclipse-workspace/SemesterTeamProject/lib/jogg-0.0.7.jar"/>
 	<classpathentry kind="lib" path="D:/eclipse-workspace/SemesterTeamProject/lib/jorbis-0.0.15.jar"/>
 	<classpathentry kind="lib" path="D:/eclipse-workspace/SemesterTeamProject/lib/jspeex0.9.7.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-workspace/SemesterTeamProject/lib/mp3agic-0.9.1.jar"/>
-	<classpathentry kind="lib" path="D:/eclipse-workspace/SemesterTeamProject/lib/mp3spi1.9.5.jar"/>
 	<classpathentry kind="lib" path="D:/eclipse-workspace/SemesterTeamProject/lib/tritonus_share.jar"/>
 	<classpathentry kind="lib" path="D:/eclipse-workspace/SemesterTeamProject/lib/vorbisspi1.0.2.jar"/>
+	<classpathentry kind="lib" path="D:/eclipse-workspace/SemesterTeamProject/lib/mp3agic-0.8.3-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="D:/eclipse-workspace/SemesterTeamProject/lib/mp3agic-0.8.3-SNAPSHOT-javadoc.jar"/>
+	<classpathentry kind="lib" path="D:/eclipse-workspace/SemesterTeamProject/lib/mp3agic-0.8.3-SNAPSHOT-sources.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

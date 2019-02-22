@@ -1,4 +1,4 @@
-import com.mpatric.mp3agic.Mp3File;
+
 import java.awt.BorderLayout;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -18,16 +18,17 @@ import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.table.TableColumn;
 
+import com.mpatric.mp3agic.Mp3File;
+
 //import StreamPlayerNew.ButtonListener;
 import javazoom.jlgui.basicplayer.BasicPlayer;
 import javazoom.jlgui.basicplayer.BasicPlayerException;
 
 public class App {
-	
-	//Mp3File mp3file = new Mp3File();
-	
 	/*
-	System.out.printlin("Length of this mp3 is: " + mp3file() + " seconds");
+	Mp3File mp3file = new Mp3File("SomeMp3File.mp3");
+	
+	System.out.println("Length of this mp3 is: " + mp3file.() + " seconds");
 	System.out.println("Bitrate: " + mp3file.getBitrate() + " kbps " + (mp3file.isVbr() ? "(VBR)" : "(CBR)"));
 	System.out.println("Sample rate: " + mp3file.getSampleRate() + " Hz");
 	System.out.println("Has ID3v1 tag?: " + (mp3file.hasId3v1Tag() ? "YES" : "NO"));
