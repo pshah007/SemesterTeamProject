@@ -1,0 +1,16 @@
+----------------------------------------------------------------
+Wed Mar 06 22:36:30 PST 2019:
+Booting Derby version The Apache Software Foundation - Apache Derby - 10.14.2.0 - (1828579): instance a816c00e-0169-56de-1ac3-000006cceee0 
+on database directory D:\eclipse-workspace\SemesterTeamProject\codejava\webdb1 with class loader sun.misc.Launcher$AppClassLoader@6d06d69c 
+Loaded from file:/D:/eclipse-workspace/SemesterTeamProject/lib/derby.jar
+java.vendor=Oracle Corporation
+java.runtime.version=1.8.0_161-b12
+user.dir=D:\eclipse-workspace\SemesterTeamProject
+os.name=Windows 10
+os.arch=amd64
+os.version=10.0
+derby.system.home=null
+Database Class Loader started - derby.database.classpath=''
+----------------------------------------------------------------
+Wed Mar 06 22:36:31 PST 2019:
+Shutting down instance a816c00e-0169-56de-1ac3-000006cceee0 on database directory D:\eclipse-workspace\SemesterTeamProject\codejava\webdb1 with class loader sun.misc.Launcher$AppClassLoader@6d06d69c 
