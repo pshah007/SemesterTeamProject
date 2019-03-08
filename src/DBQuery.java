@@ -14,17 +14,20 @@ public class DBQuery
     private static Connection conn = null;
     private static Statement stmt = null;
     private static String dbURL = "jdbc:derby:codejava/webdb1;create=true";
+    
     public static void main(String[] args) {
        createConnection();
        //insertSong("C:\\Hello.mp3");
       // insertSong("C:\\Doc\\Top.mp3");
       // insertSong("C:\\Doc\\Down.mp3");
        deleteSong("C:\\Doc\\Down.mp3");
-       selectSong();
+       selectSongs();
        //truncateTable();
        shutdown();
     }
     
+    
+    /*Creates connection to derby*/
     private static void createConnection()
     {
     	try {
@@ -39,6 +42,30 @@ public class DBQuery
             ex.printStackTrace();
         }
     }
+    
+    
+    /*creates table only if table does not exists*/
+    private static void createTable()
+    {
+        try
+        {
+            stmt = conn.createStatement();
+            stmt.execute("CREATE TABLE Music("
+            		+ "ID INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),"
+            		+ "File varchar(255),"
+            		+ "Title varchar(255),"
+            		+ "InsertDate DATE not null with default current DATE"
+            		+ ")");
+            stmt.close();
+        }
+        catch (SQLException sqlExcept)
+        {
+            sqlExcept.printStackTrace();
+        }
+    }
+    
+    
+    /*truncates table*/
     private static void truncateTable()
     {
         try
@@ -52,6 +79,9 @@ public class DBQuery
             sqlExcept.printStackTrace();
         }
     }
+    
+    
+    /*deleted a selected song from table*/
     private static void deleteSong(String FileName)
     {
     	String Title;
@@ -69,6 +99,8 @@ public class DBQuery
         }
     }
     
+    
+    /*inserts a song into table*/
     private static void insertSong(String FileName)
     {
     	String Title;
@@ -88,7 +120,9 @@ public class DBQuery
         }
     }
     
-    private static void selectSong()
+    
+    /*selects all songs from table*/
+    private static void selectSongs()
     {
         try
         {
@@ -121,6 +155,8 @@ public class DBQuery
             sqlExcept.printStackTrace();
         }
     }
+    
+    /*closes database connection*/
     private static void shutdown()
     {
         try
