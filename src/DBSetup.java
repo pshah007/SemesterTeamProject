@@ -17,7 +17,9 @@ public class DBSetup
     public static void main(String[] args) {
         createConnection();
         //dropTable();
-        createTable();
+        //createTable();
+        showTables();
+        //dropTable();
         shutdown();
     }
     
@@ -34,6 +36,25 @@ public class DBSetup
         } catch (SQLException ex) {
             ex.printStackTrace();
         }
+    }
+    
+    
+    private static void showTables() {
+    	try {
+    		stmt = conn.createStatement();
+    		ResultSet results = stmt.executeQuery("SHOW TABLES");
+    		
+    		ResultSetMetaData rsmd = results.getMetaData();
+            int numberCols = rsmd.getColumnCount();
+            for (int i=1; i<=numberCols; i++)
+            {
+                //print Column Names
+                System.out.print(rsmd.getColumnLabel(i)+"\t\t");  
+            }
+    	}
+    	catch(SQLException sqlExcept){
+    		sqlExcept.printStackTrace();
+    	}
     }
     
     
