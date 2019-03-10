@@ -1,31 +1,110 @@
+import java.io.IOException;
 import java.sql.Connection;
+import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
 import java.util.Properties;
+
+import com.mpatric.mp3agic.ID3v1;
+import com.mpatric.mp3agic.InvalidDataException;
+import com.mpatric.mp3agic.Mp3File;
+import com.mpatric.mp3agic.UnsupportedTagException;
+
 import java.sql.ResultSetMetaData;
 
 
 public class DBQuery
 {
     private static String tableName = "Music";
-    // jdbc Connection
+    private static ResultSet results;
+    private static ResultSetMetaData rsmd;
     private static Connection conn = null;
     private static Statement stmt = null;
-    private static String dbURL = "jdbc:derby:codejava/webdb1;create=true";
-    public static void main(String[] args) {
-       createConnection();
-       //insertSong("C:\\Hello.mp3");
+    private static DatabaseMetaData dbm;
+    Mp3File mp3file; 
+    private static String dbURL ="jdbc:derby:codejava/webdb1;create=true";
+    public static void main(String[] args) throws UnsupportedTagException, InvalidDataException, IOException {
+    	DBQuery query = new DBQuery();
+    	query.createConnection();
+    	//query.createTable();
+    	//query.dropTable();
+    	//query.checkSong("D:\\eclipse-workspace\\SemesterTeamProject\\src\\Green Day-Give Me Novacaine.mp3");
+    	//query.checkSong("D:\\eclipse-workspace\\SemesterTeamProject\\src\\Green Day - American Idiot.mp3");
+    	//query.checkSong("D:\\eclipse-workspace\\SemesterTeamProject\\src\\Greenday - Boulevard Of Broken Dreams.mp3");
       // insertSong("C:\\Doc\\Top.mp3");
       // insertSong("C:\\Doc\\Down.mp3");
-       deleteSong("C:\\Doc\\Down.mp3");
-       selectSong();
-       //truncateTable();
-       shutdown();
+       //deleteSong("D:\\eclipse-workspace\\SemesterTeamProject\\src\\STREETS OF RAGE.mp3");
+    	
+    	query.truncateTable();
+    	query.selectSong();
+    //	String[][] stk = query.dataDisplay();
+    	
+    	
+      // truncateTable();
+       // query.shutdown();
     }
     
-    private static void createConnection()
+	/*
+	 * CREATES TABLE. ALSO CHECKS IF THE TABLE EXIST OR NOT. 
+	 */
+    public void createTable()
+    {
+        try
+        {
+            stmt = conn.createStatement();
+            dbm = conn.getMetaData();
+            results = dbm.getTables(null, "APP", "MUSIC", null);
+            if (results.next()) {
+                System.out.println("TABLE ALREADY PRESENT");	
+            }
+            else
+            {
+            	stmt.execute("CREATE TABLE Music("
+                		+ "ID INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),"
+                		+ "File varchar(255)   ,"
+                		+ "Title varchar(255) ,"
+                		+ "Artist varchar(255) DEFAULT 'N/A',"
+                		+ "Album varchar(500) DEFAULT 'N/A',"
+                		+ "Genere varchar(255) DEFAULT 'N/A',"
+                		+ "Yr varchar(255) DEFAULT 'N/A',"
+                		+ "Length varchar(255) DEFAULT 'N/A' ,"
+                		+ "InsertDate DATE not null with default current DATE"
+                		+ ")");
+            	
+            }
+            stmt.close();
+        }
+        catch (SQLException sqlExcept)
+        {
+            sqlExcept.printStackTrace();
+        }
+    }
+    
+    
+    public void checkSong(String FileName) throws UnsupportedTagException, InvalidDataException, IOException
+    {
+    	
+        try
+        {
+            stmt = conn.createStatement();
+            String Query="SELECT * FROM Music WHERE File="+"'"+FileName+"'";
+            ResultSet result = stmt.executeQuery(Query);
+            System.out.println(result);
+            if(!result.next())
+            {
+            	insertSong(FileName);
+            }
+            stmt.close();
+        }
+        catch (SQLException sqlExcept)
+        {
+            sqlExcept.printStackTrace();
+        }
+    }
+    
+    public void createConnection()
     {
     	try {
             // connect method #1 - embedded driver
@@ -39,7 +118,7 @@ public class DBQuery
             ex.printStackTrace();
         }
     }
-    private static void truncateTable()
+    public void truncateTable()
     {
         try
         {
@@ -52,7 +131,7 @@ public class DBQuery
             sqlExcept.printStackTrace();
         }
     }
-    private static void deleteSong(String FileName)
+    public void deleteSong(String FileName)
     {
     	String Title;
         try
@@ -69,17 +148,64 @@ public class DBQuery
         }
     }
     
-    private static void insertSong(String FileName)
+    public void insertSong(String FileName) throws UnsupportedTagException, InvalidDataException, IOException
     {
     	String Title;
         try
         {
             stmt = conn.createStatement();
+            Mp3File mp3file = new Mp3File(FileName);
             Title =FileName.substring(FileName.lastIndexOf('\\')+1, FileName.length());
-            System.out.println("The Title is "+Title);
-            stmt.execute("insert into Music values(default,"+"'"+FileName+"'"+",'"+Title+"',default)");
-            //stmt.execute("insert into " + tableName + " values ("+
-              //      id + ",'" +FileName+ ",'" + Title + "')");
+            Title = Title.substring(0,Title.indexOf('.'));
+            String Artist=" ";
+            String Album =" ";
+            String Genere = " ";
+            String Year="";
+            String Length = "";
+        	if (mp3file.hasId3v1Tag()) {
+        		  ID3v1 id3v1Tag = mp3file.getId3v1Tag();
+    			  System.out.println("Title: " + id3v1Tag.getTitle());
+        		  System.out.println("Artist: " + id3v1Tag.getArtist());
+        		  System.out.println("Album: " + id3v1Tag.getAlbum());
+        		  System.out.println("Genre: " + id3v1Tag.getGenreDescription() );
+                  
+                  Title= id3v1Tag.getTitle();
+                  Artist= id3v1Tag.getArtist();
+                  Album= id3v1Tag.getAlbum();
+                  Genere= id3v1Tag.getGenreDescription();
+                  Year= id3v1Tag.getYear();
+                  Length= ""+mp3file.getLengthInSeconds();
+                  stmt.execute(
+                  		"insert into Music values(default,"+
+                  				"'"+FileName+"',"+
+                  				"'"+Title+"',"+
+                  				"'"+Artist+"',"+
+                  				"'"+Album+"',"+
+                  				"'"+Genere+"',"+
+                  				"'"+Year+"',"+
+                  				"'"+Length+"',"+
+                  				"default)");     		         		  
+        	}
+       	else
+        	{
+            stmt.execute(
+              		"insert into Music values(default,"+
+              				"'"+FileName+"',"+
+              				"'"+Title+"',"+
+              				"'"+Artist+"',"+
+              				"'"+Album+"',"+
+              				"'"+Genere+"',"+
+              				"'"+Year+"',"+
+              				"'"+Length+"',"+
+              				"default)");     
+        	}
+        	System.out.println(mp3file.getLengthInSeconds());
+
+            				//default,'HELLO','HELLo','HELLO','HELLO','HELLO',default)");
+
+
+    		
+            	
             stmt.close();
         }
         catch (SQLException sqlExcept)
@@ -88,12 +214,12 @@ public class DBQuery
         }
     }
     
-    private static void selectSong()
+    public void selectSong()
     {
         try
         {
             stmt = conn.createStatement();
-            ResultSet results = stmt.executeQuery("select * from " + tableName);
+            results = stmt.executeQuery("select * from MUSIC");
             ResultSetMetaData rsmd = results.getMetaData();
             int numberCols = rsmd.getColumnCount();
             for (int i=1; i<=numberCols; i++)
@@ -106,12 +232,25 @@ public class DBQuery
 
             while(results.next())
             {
-              //  int id = results.getInt(1);
                 String ID = results.getString(1);
                 String FILE = results.getString(2);
                 String TITLE = results.getString(3);
-                String DATE = results.getString(4);
-                System.out.println(ID + "\t\t" + FILE + "\t\t" +TITLE+"\t\t"+DATE+"\t\t");
+                String ARTIST = results.getString(4);
+                String ALBUM = results.getString(5);
+                String GENERE = results.getString(6);
+                String YR = results.getString(7);
+                String Length = results.getString(8);
+                String DATE = results.getString(9);
+        		
+                System.out.println(ID + "\t\t" 
+                		+ FILE + "\t\t" 
+                		+TITLE + "\t\t"
+                		+ARTIST + "\t\t" 
+                		+ALBUM + "\t\t"
+                		+GENERE+"\t\t"
+                		+YR+"\t\t"
+                		+Length+"\t\t"
+                		+DATE+"\t\t");
             }
             results.close();
             stmt.close();
@@ -121,7 +260,22 @@ public class DBQuery
             sqlExcept.printStackTrace();
         }
     }
-    private static void shutdown()
+    
+    public void dropTable()
+    {
+        try
+        {
+            stmt = conn.createStatement();
+            stmt.execute("DROP TABLE Music");
+            stmt.close();
+        }
+        catch (SQLException sqlExcept)
+        {
+            sqlExcept.printStackTrace();
+        }
+    }
+    
+    public void shutdown()
     {
         try
         {
@@ -140,6 +294,41 @@ public class DBQuery
             
         }
 
+    }
+    public String[][] dataDisplay() 
+    {
+    	String[][] stk = null;
+    	try {
+	        stmt = conn.createStatement();
+	        results = stmt.executeQuery("select * from MUSIC");
+	        ResultSetMetaData rsmd = results.getMetaData();
+	        int numberCols = rsmd.getColumnCount();
+	        results = stmt.executeQuery("select count(*) AS rowcount from MUSIC");
+	        results.next();
+	        int numberRows = results.getInt("rowcount");
+	        stk = new String[numberRows][numberCols-2];
+	        
+	        results = stmt.executeQuery("select * from MUSIC");
+	        int t=0;
+	        while(results.next())
+	        {
+	        	
+	        	stk[t][0] = results.getString(2);
+	        	stk[t][1] = results.getString(3);		
+	        	stk[t][2] = results.getString(4);
+	    	    stk[t][3] = results.getString(5);
+	    	    stk[t][4] = results.getString(6);
+	    	    stk[t][5] = results.getString(7);
+	    	    stk[t][6] = results.getString(8);
+	    	    t++;
+	        }
+    	}
+		
+        catch (SQLException sqlExcept)
+        {
+            sqlExcept.printStackTrace();
+        }
+    	return stk;
     }
     
     
