@@ -48,6 +48,7 @@ import javax.swing.table.TableColumn;
 import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.UnsupportedTagException;
 
+import javazoom.jlgui.basicplayer.BasicController;
 //import StreamPlayerNew.ButtonListener;
 import javazoom.jlgui.basicplayer.BasicPlayer;
 import javazoom.jlgui.basicplayer.BasicPlayerException;
@@ -64,7 +65,7 @@ public class App {
     JPanel bottombtnPnl;
     JPanel bottombtnPn2;
     JPanel bottombtnPn3;
-    ButtonListener bl;
+    ButtonListener Playbutton;
     JScrollPane scrollPane; 
     int CurrentSelectedRow;
     JButton Play;
@@ -75,8 +76,11 @@ public class App {
     JButton Repeat;
     JButton Shuffle;
     JButton Delete;
+    JButton Search;
     JPanel btnPnl;
     BasicPlayer player;
+    BasicController control ;
+
     static DefaultTableModel tableModel;
     static DBQuery Query;
     final JTextArea textArea;
@@ -107,13 +111,17 @@ public class App {
     	 Query.createTable();
     	 MyDragDropListener myDragDropListener = new MyDragDropListener();
 
-    	 
+    	 /*
+    	  * CREATING THREE BUTTON PANELS
+    	  * bottombtnPnl CONTAINS PLAY,STOP,PAUSE
+    	  * bottombtnPn2 CONTAINS PREVIOUS,REPEAT,DELETE
+    	  * bottombtnPn3 CONTAINS SHUFFLE,SEARCH,NEXT
+    	  */
+   
     	bottombtnPnl = new JPanel();
     	bottombtnPnl.setLayout(new BorderLayout(0, 0));
-    	
     	bottombtnPn2 = new JPanel();
     	bottombtnPn2.setLayout(new BorderLayout(0, 0));
-    	
     	bottombtnPn3 = new JPanel();
     	bottombtnPn3.setLayout(new BorderLayout(0, 0));
     	
@@ -125,7 +133,9 @@ public class App {
     	textArea= new JTextArea();
     	new DropTarget(textArea, myDragDropListener);	
     	String[] columns = {"FILE","TITLE","ARTIST","ALBUM","GENERE","YEAR","LENGTH"};
-    	  player = new BasicPlayer();
+    	player = new BasicPlayer();
+        control = (BasicController) player;
+      
           //data holds the table data and maps as a 2d array into the table
           String[][] data = Query.dataDisplay();
           
@@ -161,7 +171,7 @@ public class App {
         column.setPreferredWidth(50);
         
         
-        bl = new ButtonListener();
+        Playbutton = new ButtonListener();
         Play = new JButton("Play");
         Pause = new JButton("Pause");
         Stop = new JButton("Stop");
@@ -169,8 +179,10 @@ public class App {
         Next = new JButton("Next");
         Repeat = new JButton("Repeat");
         Delete = new JButton("Delete");
+        Shuffle = new JButton("Shuffle");
+        Search = new JButton("Search");
         
-        Play.addActionListener(bl);
+        Play.addActionListener(Playbutton);
         scrollPane = new JScrollPane(table);
         
         bottombtnPnl.add(Play, BorderLayout.CENTER);
@@ -180,18 +192,10 @@ public class App {
         bottombtnPn2.add(Repeat, BorderLayout.LINE_END);
         bottombtnPn2.add(Delete, BorderLayout.CENTER);
         
-        bottombtnPn3.add(Previous, BorderLayout.LINE_START);
-        bottombtnPn3.add(Repeat, BorderLayout.LINE_END);
-        bottombtnPn3.add(Delete, BorderLayout.CENTER);
-        
-        
-        /*
-        bottombtnPnl.add(Play);
-        bottombtnPnl.add(Pause);
-        bottombtnPnl.add(Stop);
-        bottombtnPnl.add(Previous);
-        bottombtnPnl.add(Next);
-        */
+        bottombtnPn3.add(Shuffle, BorderLayout.LINE_START);
+        bottombtnPn3.add(Search, BorderLayout.CENTER);
+        bottombtnPn3.add(Next, BorderLayout.LINE_END);
+ 
         
         btnPnl.add(bottombtnPnl, BorderLayout.CENTER);
         btnPnl.add(bottombtnPn2, BorderLayout.LINE_START);
@@ -202,7 +206,7 @@ public class App {
         main.add(scrollPane, BorderLayout.NORTH);
         main.add(textArea, BorderLayout.CENTER);
         main.add(btnPnl, BorderLayout.SOUTH);
-        main.setSize(1500,300);
+        main.setSize(1500,700);
     }
     
 
@@ -215,30 +219,12 @@ public class App {
     class ButtonListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            String url=null;
+            File file=null;
+            int column = 0;
+        	int row = table.getSelectedRow();
             if("Play".equals(e.getActionCommand())){
-            	if(CurrentSelectedRow==0)
-            	{
-            		System.out.println("Rock");
-            		 url = "https://mp3.ffh.de/ffhchannels/hqrock.mp3";
-            	}
-            	if(CurrentSelectedRow==1)
-            	{
-            		System.out.println("The 80's");
-            		 url = "https://mp3.ffh.de/ffhchannels/hq80er.mp3";
-            	}
-            	if(CurrentSelectedRow==2)
-            	{
-            		System.out.println("Pur Deutsch");
-            		 url = "https://mp3.ffh.de/ffhchannels/hqdeutsch.mp3";
-            		
-            	}
-            	if(CurrentSelectedRow==3)
-            	{
-            		System.out.println("The 90's");
-            		 url = "https://mp3.ffh.de/ffhchannels/hq90er.mp3";
-            	}
-
+            	 file = new File("D:\\eclipse-workspace\\SemesterTeamProject\\src\\Greenday - Boulevard Of Broken Dreams.mp3");
+            			 //table.getModel().getValueAt(row, column).toString());
                   
             }
       
@@ -246,12 +232,12 @@ public class App {
 //create if, output and url assignment statements for the other two channels
             
             try {
-                player.open(new URL(url));
-                player.play();
-            } catch (MalformedURLException ex) {
-                Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
-                System.out.println("Malformed url");
-            } catch (BasicPlayerException ex) {
+            	control.open(file);
+            	control.play();
+            	control.setGain(.85);
+            	control.setPan(0.0);
+            	
+            }  catch (BasicPlayerException ex) {
                 System.out.println("BasicPlayer exception");
                 Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
             }
