@@ -23,13 +23,18 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
-import java.io.FileReader;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.sound.sampled.AudioFormat;
+import javax.sound.sampled.AudioInputStream;
+import javax.sound.sampled.AudioSystem;
+import javax.sound.sampled.DataLine;
+import javax.sound.sampled.LineUnavailableException;
+import javax.sound.sampled.SourceDataLine;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -40,8 +45,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.border.EtchedBorder;
-import javax.swing.border.TitledBorder;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
@@ -101,6 +104,8 @@ public class App {
     	
     	Exit.addActionListener(new exitJmenuButton());
     	New.addActionListener(new newJmenuButton());
+    	
+    	
     	
     	/*
     	 * CREATING NEW OBJECT FOR DB QUERY TO CONNECT DB WHICH IS CALLED WEBDB1
@@ -215,7 +220,60 @@ public class App {
         main.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         main.setVisible(true);
     }
-     
+	public static void testPlay(String filename)
+	{
+	  try {
+	    File file = new File(filename);
+	    AudioInputStream in= AudioSystem.getAudioInputStream(file);
+	    AudioInputStream din = null;
+	    AudioFormat baseFormat = in.getFormat();
+	    AudioFormat decodedFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 
+	                                                                                  baseFormat.getSampleRate(),
+	                                                                                  16,
+	                                                                                  baseFormat.getChannels(),
+	                                                                                  baseFormat.getChannels() * 2,
+	                                                                                  baseFormat.getSampleRate(),
+	                                                                                  false);
+	    din = AudioSystem.getAudioInputStream(decodedFormat, in);
+	    // Play now. 
+	    rawplay(decodedFormat, din);
+	    in.close();
+	  } catch (Exception e)
+	    {
+	        //Handle exception.
+	    }
+	}
+	
+	private static void rawplay(AudioFormat targetFormat, AudioInputStream din) throws IOException,                                                                                                LineUnavailableException
+	{
+	  byte[] data = new byte[4096];
+	  SourceDataLine line = getLine(targetFormat); 
+	  if (line != null)
+	  {
+	    // Start
+	    line.start();
+	    int nBytesRead = 0, nBytesWritten = 0;
+	    while (nBytesRead != -1)
+	    {
+	        nBytesRead = din.read(data, 0, data.length);
+	        if (nBytesRead != -1) nBytesWritten = line.write(data, 0, nBytesRead);
+	    }
+	    // Stop
+	    line.drain();
+	    line.stop();
+	    line.close();
+	    din.close();
+	  } 
+	}
+	private static SourceDataLine getLine(AudioFormat audioFormat) throws LineUnavailableException
+	{
+	  SourceDataLine res = null;
+	  DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
+	  res = (SourceDataLine) AudioSystem.getLine(info);
+	  res.open(audioFormat);
+	  return res;
+	} 
+
     class ButtonListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -223,27 +281,11 @@ public class App {
             int column = 0;
         	int row = table.getSelectedRow();
             if("Play".equals(e.getActionCommand())){
-            	 file = new File("D:\\eclipse-workspace\\SemesterTeamProject\\src\\Greenday - Boulevard Of Broken Dreams.mp3");
-            			 //table.getModel().getValueAt(row, column).toString());
+            	testPlay(table.getModel().getValueAt(row, column).toString());
                   
             }
-      
 
-//create if, output and url assignment statements for the other two channels
-            
-            try {
-            	control.open(file);
-            	control.play();
-            	control.setGain(.85);
-            	control.setPan(0.0);
-            	
-            }  catch (BasicPlayerException ex) {
-                System.out.println("BasicPlayer exception");
-                Logger.getLogger(App.class.getName()).log(Level.SEVERE, null, ex);
-            }
-        }
-        
-        
+        } 
     }
     /*
      * RELATED TO THE JMENU BUTTON EXIT
