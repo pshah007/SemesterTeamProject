@@ -41,6 +41,7 @@ import javax.swing.JFrame;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
@@ -48,7 +49,9 @@ import javax.swing.JTextArea;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
+import com.mpatric.mp3agic.ID3v1;
 import com.mpatric.mp3agic.InvalidDataException;
+import com.mpatric.mp3agic.Mp3File;
 import com.mpatric.mp3agic.UnsupportedTagException;
 
 import javazoom.jlgui.basicplayer.BasicController;
@@ -68,7 +71,9 @@ public class App {
     JPanel bottombtnPnl;
     JPanel bottombtnPn2;
     JPanel bottombtnPn3;
-    ButtonListener Playbutton;
+    ButtonListener buttonListener;
+    
+    
     JScrollPane scrollPane; 
     int CurrentSelectedRow;
     JButton Play;
@@ -83,7 +88,8 @@ public class App {
     JPanel btnPnl;
     BasicPlayer player;
     BasicController control ;
-
+    static String[][] data;
+    static String[] columns = new String[7];
     static DefaultTableModel tableModel;
     static DBQuery Query;
     final JTextArea textArea;
@@ -137,17 +143,24 @@ public class App {
     	 */
     	textArea= new JTextArea();
     	new DropTarget(textArea, myDragDropListener);	
-    	String[] columns = {"FILE","TITLE","ARTIST","ALBUM","GENERE","YEAR","LENGTH"};
+    	columns[0] ="FILE";
+    	columns[1] ="TITLE";
+    	columns[2] ="ARTIST";
+    	columns[3] ="ALBUM";
+    	columns[4] ="GENERE";
+    	columns[5] ="YEAR";
+    	columns[6] ="LENGTH";
     	player = new BasicPlayer();
         control = (BasicController) player;
       
           //data holds the table data and maps as a 2d array into the table
-          String[][] data = Query.dataDisplay();
+          data = Query.dataDisplay();
           
           
           
-          
-          table = new JTable(data, columns);
+          tableModel= new DefaultTableModel(data, columns);
+          table = new JTable();
+          table.setModel(tableModel);
           table.setDragEnabled(true);
           MouseListener mouseListener = new MouseAdapter() {
               //this will print the selected row index when a user clicks the table
@@ -176,7 +189,7 @@ public class App {
         column.setPreferredWidth(50);
         
         
-        Playbutton = new ButtonListener();
+        buttonListener = new ButtonListener();
         Play = new JButton("Play");
         Pause = new JButton("Pause");
         Stop = new JButton("Stop");
@@ -187,7 +200,10 @@ public class App {
         Shuffle = new JButton("Shuffle");
         Search = new JButton("Search");
         
-        Play.addActionListener(Playbutton);
+        Play.addActionListener(buttonListener);
+        Delete.addActionListener(buttonListener);
+        Search.addActionListener(buttonListener);
+       
         scrollPane = new JScrollPane(table);
         
         bottombtnPnl.add(Play, BorderLayout.CENTER);
@@ -214,65 +230,57 @@ public class App {
         main.setSize(1500,700);
     }
     
-
+    
+    public static void addSong(String fileName) throws UnsupportedTagException, InvalidDataException, IOException
+    {
+        Mp3File mp3file = new Mp3File(fileName);
+        String Title =fileName.substring(fileName.lastIndexOf('\\')+1, fileName.length());
+        Title = Title.substring(0,Title.indexOf('.'));
+        String Artist=" ";
+        String Album =" ";
+        String Genere = " ";
+        String Year="";
+        String Length = "";
+    	if (mp3file.hasId3v1Tag()) {
+    		  ID3v1 id3v1Tag = mp3file.getId3v1Tag();
+			  System.out.println("Title: " + id3v1Tag.getTitle());
+    		  System.out.println("Artist: " + id3v1Tag.getArtist());
+    		  System.out.println("Album: " + id3v1Tag.getAlbum());
+    		  System.out.println("Genre: " + id3v1Tag.getGenreDescription() );
+              
+              Title= id3v1Tag.getTitle();
+              Artist= id3v1Tag.getArtist();
+              Album= id3v1Tag.getAlbum();
+              Genere= id3v1Tag.getGenreDescription();
+              Year= id3v1Tag.getYear();
+              Length= ""+mp3file.getLengthInSeconds();    		    
+    	}
+    		 Query.checkSong(fileName,Title,Artist,Album,Genere,Year,Length);
+    		 String rowEntry = "";
+    		 int check=0;
+    		   for (int i = 0; i < tableModel.getRowCount(); i++) {
+    		 
+    		            rowEntry = table.getValueAt(i, 0).toString();
+    		        if (rowEntry.equalsIgnoreCase(fileName)) {
+    		        	check=1;
+    		            break;
+    		        }
+    		    }
+    		   if(check==0)
+    		   {
+    			   String[] rown = { fileName, Title,Artist,Album,Genere,Year,Length };
+    			   tableModel.addRow(rown);
+    		   }
+    }
 
 	public void go(){
         main.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         main.setVisible(true);
     }
-	public static void testPlay(String filename)
-	{
-	  try {
-	    File file = new File(filename);
-	    AudioInputStream in= AudioSystem.getAudioInputStream(file);
-	    AudioInputStream din = null;
-	    AudioFormat baseFormat = in.getFormat();
-	    AudioFormat decodedFormat = new AudioFormat(AudioFormat.Encoding.PCM_SIGNED, 
-	                                                                                  baseFormat.getSampleRate(),
-	                                                                                  16,
-	                                                                                  baseFormat.getChannels(),
-	                                                                                  baseFormat.getChannels() * 2,
-	                                                                                  baseFormat.getSampleRate(),
-	                                                                                  false);
-	    din = AudioSystem.getAudioInputStream(decodedFormat, in);
-	    // Play now. 
-	    rawplay(decodedFormat, din);
-	    in.close();
-	  } catch (Exception e)
-	    {
-	        //Handle exception.
-	    }
-	}
+
 	
-	private static void rawplay(AudioFormat targetFormat, AudioInputStream din) throws IOException,                                                                                                LineUnavailableException
-	{
-	  byte[] data = new byte[4096];
-	  SourceDataLine line = getLine(targetFormat); 
-	  if (line != null)
-	  {
-	    // Start
-	    line.start();
-	    int nBytesRead = 0, nBytesWritten = 0;
-	    while (nBytesRead != -1)
-	    {
-	        nBytesRead = din.read(data, 0, data.length);
-	        if (nBytesRead != -1) nBytesWritten = line.write(data, 0, nBytesRead);
-	    }
-	    // Stop
-	    line.drain();
-	    line.stop();
-	    line.close();
-	    din.close();
-	  } 
-	}
-	private static SourceDataLine getLine(AudioFormat audioFormat) throws LineUnavailableException
-	{
-	  SourceDataLine res = null;
-	  DataLine.Info info = new DataLine.Info(SourceDataLine.class, audioFormat);
-	  res = (SourceDataLine) AudioSystem.getLine(info);
-	  res.open(audioFormat);
-	  return res;
-	} 
+
+
 
     class ButtonListener implements ActionListener {
         @Override
@@ -281,12 +289,56 @@ public class App {
             int column = 0;
         	int row = table.getSelectedRow();
             if("Play".equals(e.getActionCommand())){
-            	testPlay(table.getModel().getValueAt(row, column).toString());
+            	try {
+            	    player.open(new URL("file:///" + table.getModel().getValueAt(row, column).toString()));
+            	    player.play();
+            	} catch (BasicPlayerException | MalformedURLException e1) {
+            	    e1.printStackTrace();
+            	}
+            	//testPlay(table.getModel().getValueAt(row, column).toString());
                   
+            }
+            if("Delete".equals(e.getActionCommand())){
+            	Query.deleteSong(table.getModel().getValueAt(row, column).toString());
+            	
+            	
+             	// i = the index of the selected row
+            	int i = table.getSelectedRow();
+            	if (i >= 0) {
+            	// remove a row from jtable
+            		tableModel.removeRow(i);
+            	} else {
+            	System.out
+            	.println("There were issue while Deleting the Row(s).");
+            	}
+            	
+            	table.addNotify();
+            }
+            if("Search".equals(e.getActionCommand()))
+            {
+            	String stk="";
+                String name = JOptionPane.showInputDialog(main, "What is the name of the song?");//Note: input can be null.
+                try {
+					stk=Query.searchSongByTitle(name);
+					System.out.println("The Search Path is  "+stk);
+	            	try {
+	            	    player.open(new URL("file:///" + stk));
+	            	    player.play();
+	            	} catch (BasicPlayerException | MalformedURLException e1) {
+	            	    e1.printStackTrace();
+	            	}
+				} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+                
             }
 
         } 
     }
+    
+
+    
     /*
      * RELATED TO THE JMENU BUTTON EXIT
      * CLOSES THE WINDOW
@@ -314,7 +366,7 @@ public class App {
             	    DefaultTableModel contactTableModel = (DefaultTableModel) table.getModel();
             	   System.out.println(file.getPath());
             	   try {
-					Query.checkSong(file.getPath());
+					addSong(file.getPath());
 				} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -351,6 +403,7 @@ public class App {
                         for (File file1 : file) {
 
                             // Print out the file path
+                        	addSong(file1.getPath());
                         	Stk+=file1.getPath()+"\n";
                         	textArea.setText(Stk);
                             System.out.println("File path is '" + file1.getPath() + "'.");

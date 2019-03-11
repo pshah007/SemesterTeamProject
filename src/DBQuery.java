@@ -49,6 +49,28 @@ public class DBQuery
 	/*
 	 * CREATES TABLE. ALSO CHECKS IF THE TABLE EXIST OR NOT. 
 	 */
+    
+    
+    public String searchSongByTitle(String Title) throws UnsupportedTagException, InvalidDataException, IOException
+    {
+    	String path="";
+        try
+        {
+            stmt = conn.createStatement();
+            String Query="SELECT * FROM Music WHERE Title="+"'"+Title+"'";
+            ResultSet result = stmt.executeQuery(Query);
+            if(result.next())
+            {
+            	path=result.getString(2);
+            }
+            stmt.close();
+        }
+        catch (SQLException sqlExcept)
+        {
+            sqlExcept.printStackTrace();
+        }
+        return path;
+    }
     public void createTable()
     {
         try
@@ -83,7 +105,7 @@ public class DBQuery
     }
     
     
-    public void checkSong(String FileName) throws UnsupportedTagException, InvalidDataException, IOException
+    public void checkSong(String FileName,String Title,String Artist, String Album,String Genere,String Year,String Length) throws UnsupportedTagException, InvalidDataException, IOException
     {
     	
         try
@@ -94,7 +116,7 @@ public class DBQuery
             System.out.println(result);
             if(!result.next())
             {
-            	insertSong(FileName);
+            	insertSong(FileName,Title,Artist,Album,Genere,Year,Length);
             }
             stmt.close();
         }
@@ -148,46 +170,11 @@ public class DBQuery
         }
     }
     
-    public void insertSong(String FileName) throws UnsupportedTagException, InvalidDataException, IOException
+    public void insertSong(String FileName,String Title,String Artist, String Album,String Genere,String Year,String Length) throws UnsupportedTagException, InvalidDataException, IOException
     {
-    	String Title;
         try
         {
             stmt = conn.createStatement();
-            Mp3File mp3file = new Mp3File(FileName);
-            Title =FileName.substring(FileName.lastIndexOf('\\')+1, FileName.length());
-            Title = Title.substring(0,Title.indexOf('.'));
-            String Artist=" ";
-            String Album =" ";
-            String Genere = " ";
-            String Year="";
-            String Length = "";
-        	if (mp3file.hasId3v1Tag()) {
-        		  ID3v1 id3v1Tag = mp3file.getId3v1Tag();
-    			  System.out.println("Title: " + id3v1Tag.getTitle());
-        		  System.out.println("Artist: " + id3v1Tag.getArtist());
-        		  System.out.println("Album: " + id3v1Tag.getAlbum());
-        		  System.out.println("Genre: " + id3v1Tag.getGenreDescription() );
-                  
-                  Title= id3v1Tag.getTitle();
-                  Artist= id3v1Tag.getArtist();
-                  Album= id3v1Tag.getAlbum();
-                  Genere= id3v1Tag.getGenreDescription();
-                  Year= id3v1Tag.getYear();
-                  Length= ""+mp3file.getLengthInSeconds();
-                  stmt.execute(
-                  		"insert into Music values(default,"+
-                  				"'"+FileName+"',"+
-                  				"'"+Title+"',"+
-                  				"'"+Artist+"',"+
-                  				"'"+Album+"',"+
-                  				"'"+Genere+"',"+
-                  				"'"+Year+"',"+
-                  				"'"+Length+"',"+
-                  				"default)");     		         		  
-        	}
-       	else
-        	{
             stmt.execute(
               		"insert into Music values(default,"+
               				"'"+FileName+"',"+
@@ -198,14 +185,8 @@ public class DBQuery
               				"'"+Year+"',"+
               				"'"+Length+"',"+
               				"default)");     
-        	}
-        	System.out.println(mp3file.getLengthInSeconds());
 
             				//default,'HELLO','HELLo','HELLO','HELLO','HELLO',default)");
-
-
-    		
-            	
             stmt.close();
         }
         catch (SQLException sqlExcept)
