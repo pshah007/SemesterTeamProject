@@ -86,7 +86,7 @@ public class App {
     JButton Delete;
     JButton Search;
     JPanel btnPnl;
-    BasicPlayer player;
+    static BasicPlayer player;
     BasicController control ;
     static String[][] data;
     static String[] columns = new String[7];
@@ -110,7 +110,7 @@ public class App {
     	
     	Exit.addActionListener(new exitJmenuButton());
     	New.addActionListener(new newJmenuButton());
-    	
+    	Open.addActionListener(new openJmenuButton());
     	
     	
     	/*
@@ -371,6 +371,28 @@ public class App {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
+               }
+         }
+    }
+    
+    static class openJmenuButton implements ActionListener
+    {
+        public void actionPerformed(ActionEvent e)
+        {
+        	
+        	   JFileChooser chooser = new JFileChooser();
+               if (chooser.showOpenDialog(main) == JFileChooser.APPROVE_OPTION) {
+            	   File file = chooser.getSelectedFile();
+            	    DefaultTableModel contactTableModel = (DefaultTableModel) table.getModel();
+            	    try {
+            	    player.open(new URL("file:///" + file.getPath()));
+            	    player.play();
+            	    }
+             	   catch (BasicPlayerException | MalformedURLException e2) {
+	            	    e2.printStackTrace();
+	            	}
+            	    
+
                }
          }
     }
