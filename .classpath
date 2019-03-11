@@ -1,41 +1,19 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8">
-		<attributes>
-			<attribute name="module" value="true"/>
-		</attributes>
-	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/Semester 2/543 ASE/jar files/basicplayer3.0.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/Semester 2/543 ASE/jar files/mp3agic-0.8.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/Semester 2/543 ASE/jar files/mp3agic-0.8.3-SNAPSHOT-javadoc.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/Semester 2/543 ASE/jar files/mp3agic-0.8.3-SNAPSHOT-sources.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/Semester 2/543 ASE/jar files/mp3spi1.9.51.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/Semester 2/543 ASE/SemesterTeamProject/lib/commons-logging-api.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/Semester 2/543 ASE/SemesterTeamProject/lib/derby.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/Semester 2/543 ASE/SemesterTeamProject/lib/jl1.0.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/Semester 2/543 ASE/SemesterTeamProject/lib/jogg-0.0.7.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/Semester 2/543 ASE/SemesterTeamProject/lib/jorbis-0.0.15.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/Semester 2/543 ASE/SemesterTeamProject/lib/jspeex0.9.7.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/Semester 2/543 ASE/SemesterTeamProject/lib/tritonus_share.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/Semester 2/543 ASE/SemesterTeamProject/lib/vorbisspi1.0.2.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/db-derby-10.14.2.0-bin/lib/derbyclient.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/db-derby-10.14.2.0-bin/lib/derbyLocale_cs.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/db-derby-10.14.2.0-bin/lib/derbyLocale_de_DE.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/db-derby-10.14.2.0-bin/lib/derbyLocale_es.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/db-derby-10.14.2.0-bin/lib/derbyLocale_fr.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/db-derby-10.14.2.0-bin/lib/derbyLocale_hu.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/db-derby-10.14.2.0-bin/lib/derbyLocale_it.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/db-derby-10.14.2.0-bin/lib/derbyLocale_ja_JP.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/db-derby-10.14.2.0-bin/lib/derbyLocale_ko_KR.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/db-derby-10.14.2.0-bin/lib/derbyLocale_pl.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/db-derby-10.14.2.0-bin/lib/derbyLocale_pt_BR.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/db-derby-10.14.2.0-bin/lib/derbyLocale_ru.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/db-derby-10.14.2.0-bin/lib/derbyLocale_zh_CN.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/db-derby-10.14.2.0-bin/lib/derbyLocale_zh_TW.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/db-derby-10.14.2.0-bin/lib/derbynet.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/db-derby-10.14.2.0-bin/lib/derbyoptionaltools.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/db-derby-10.14.2.0-bin/lib/derbyrun.jar"/>
-	<classpathentry kind="lib" path="/home/amaan/Desktop/db-derby-10.14.2.0-bin/lib/derbytools.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Aman Aslam/eclipse-workspace/myPlayer/Lib/basicplayer3.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Aman Aslam/eclipse-workspace/myPlayer/Lib/commons-logging-api.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Aman Aslam/eclipse-workspace/myPlayer/Lib/derby.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Aman Aslam/eclipse-workspace/myPlayer/Lib/jl1.0.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Aman Aslam/eclipse-workspace/myPlayer/Lib/jogg-0.0.7.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Aman Aslam/eclipse-workspace/myPlayer/Lib/jorbis-0.0.15.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Aman Aslam/eclipse-workspace/myPlayer/Lib/jspeex0.9.7.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Aman Aslam/eclipse-workspace/myPlayer/Lib/mp3agic-0.8.3-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Aman Aslam/eclipse-workspace/myPlayer/Lib/mp3agic-0.8.3-SNAPSHOT-javadoc.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Aman Aslam/eclipse-workspace/myPlayer/Lib/mp3agic-0.8.3-SNAPSHOT-sources.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Aman Aslam/eclipse-workspace/myPlayer/Lib/mp3spi1.9.5.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Aman Aslam/eclipse-workspace/myPlayer/Lib/tritonus_share.jar"/>
+	<classpathentry kind="lib" path="C:/Users/Aman Aslam/eclipse-workspace/myPlayer/Lib/vorbisspi1.0.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
