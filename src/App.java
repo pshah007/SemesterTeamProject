@@ -10,7 +10,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
 import java.util.List;
-
+import java.util.Random;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
@@ -86,7 +86,7 @@ public class App {
     JButton Stop;
     JButton Previous;
     JButton Next;
-    JButton Repeat;
+    //JButton Repeat;
     JButton Shuffle;
     JButton Delete;
     JButton Search;
@@ -208,7 +208,7 @@ public class App {
         Stop = new JButton("Stop");
         Previous = new JButton("Previous");
         Next = new JButton("Next");
-        Repeat = new JButton("Repeat");
+        //Repeat = new JButton("Repeat");
         Delete = new JButton("Delete");
         Shuffle = new JButton("Shuffle");
         Search = new JButton("Search");
@@ -220,7 +220,7 @@ public class App {
         Search.addActionListener(buttonListener);
         Next.addActionListener(buttonListener);
         Previous.addActionListener(buttonListener);
-        Repeat.addActionListener(buttonListener);
+        //Repeat.addActionListener(buttonListener);
         Shuffle.addActionListener(buttonListener);
         scrollPane = new JScrollPane(table);
         
@@ -228,7 +228,7 @@ public class App {
         bottombtnPnl.add(Stop, BorderLayout.LINE_START);
         bottombtnPnl.add(Pause, BorderLayout.LINE_END);
         bottombtnPn2.add(Previous, BorderLayout.LINE_START);
-        bottombtnPn2.add(Repeat, BorderLayout.LINE_END);
+        //bottombtnPn2.add(Repeat, BorderLayout.LINE_END);
         bottombtnPn2.add(Delete, BorderLayout.CENTER);
         
         bottombtnPn3.add(Shuffle, BorderLayout.LINE_START);
@@ -438,7 +438,7 @@ public class App {
 					e1.printStackTrace();
 				}
             }
-            if("Repeat".contentEquals(e.getActionCommand()))
+            /*if("Repeat".contentEquals(e.getActionCommand()))
             {
             	isPaused = false;
             	
@@ -452,10 +452,34 @@ public class App {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-            }
+            }*/
             if("Shuffle".contentEquals(e.getActionCommand()))
             {
-            
+            	isPaused = false;
+            	//calculating a random row number to play a random song
+            	Random rand = new Random();
+            	int min = 0 ;
+            	int max = table.getColumnCount();
+            	
+            	//selecting the song and setting label
+            	table.clearSelection();
+            	row = rand.nextInt((max-min) + 1) + min;
+            	table.addRowSelectionInterval(row, row);
+
+            	String Title = table.getModel().getValueAt(row, 1).toString();
+        		String Artist = table.getModel().getValueAt(row, 2).toString();
+        		nowPlaying.setText("<html>Now Playing: &nbsp;&nbsp;<br/>" + Title + "&nbsp;&nbsp;<br/> by &nbsp;&nbsp;<br/>" + Artist + "&nbsp;&nbsp;</html>");
+        		
+            	try {
+            		player.open(new URL("file:///" + table.getModel().getValueAt(row, column).toString()));
+            	    player.play();
+				} catch (BasicPlayerException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (MalformedURLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
             }
 
         }
