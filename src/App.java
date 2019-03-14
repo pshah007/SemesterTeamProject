@@ -7,8 +7,10 @@
 
 
 import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.util.List;
-
+import java.util.Random;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
@@ -38,6 +40,7 @@ import javax.sound.sampled.SourceDataLine;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JLabel;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -46,6 +49,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.SwingConstants;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 
@@ -71,6 +75,7 @@ public class App {
     JPanel bottombtnPnl;
     JPanel bottombtnPn2;
     JPanel bottombtnPn3;
+    JPanel bottombtnPnx;
     ButtonListener buttonListener;
     
     
@@ -81,7 +86,7 @@ public class App {
     JButton Stop;
     JButton Previous;
     JButton Next;
-    JButton Repeat;
+    //JButton Repeat;
     JButton Shuffle;
     JButton Delete;
     JButton Search;
@@ -93,6 +98,15 @@ public class App {
     static DefaultTableModel tableModel;
     static DBQuery Query;
     final JTextArea textArea;
+    static boolean isPaused = false;
+    JLabel nowPlaying = new JLabel("");
+
+
+	
+    
+    /**
+     * 
+     */
     public App(){
     	
     	/*
@@ -100,9 +114,9 @@ public class App {
     	 */
     	JMenuBar mb = new JMenuBar();
     	JMenu menu = new JMenu("FILE");
-    	JMenuItem New = new JMenuItem("NEW");
-    	JMenuItem Open = new JMenuItem("OPEN");
-    	JMenuItem Exit = new JMenuItem("EXIT");
+    	JMenuItem New = new JMenuItem("Add To Library");
+    	JMenuItem Open = new JMenuItem("Open A Song");
+    	JMenuItem Exit = new JMenuItem("Exit");
     	menu.add(New);
     	menu.add(Open);
     	menu.add(Exit);
@@ -111,7 +125,7 @@ public class App {
     	Exit.addActionListener(new exitJmenuButton());
     	New.addActionListener(new newJmenuButton());
     	Open.addActionListener(new openJmenuButton());
-    	
+    	main.pack();
     	
     	/*
     	 * CREATING NEW OBJECT FOR DB QUERY TO CONNECT DB WHICH IS CALLED WEBDB1
@@ -126,7 +140,7 @@ public class App {
     	  * CREATING THREE BUTTON PANELS
     	  * bottombtnPnl CONTAINS PLAY,STOP,PAUSE
     	  * bottombtnPn2 CONTAINS PREVIOUS,REPEAT,DELETE
-    	  * bottombtnPn3 CONTAINS SHUFFLE,SEARCH,NEXT
+    	  * bottombtnPn3 CONTAINS Shuffle,SEARCH,NEXT
     	  */
    
     	bottombtnPnl = new JPanel();
@@ -135,7 +149,6 @@ public class App {
     	bottombtnPn2.setLayout(new BorderLayout(0, 0));
     	bottombtnPn3 = new JPanel();
     	bottombtnPn3.setLayout(new BorderLayout(0, 0));
-    	
     	btnPnl = new JPanel(new BorderLayout());
     	
     	/*
@@ -195,22 +208,27 @@ public class App {
         Stop = new JButton("Stop");
         Previous = new JButton("Previous");
         Next = new JButton("Next");
-        Repeat = new JButton("Repeat");
+        //Repeat = new JButton("Repeat");
         Delete = new JButton("Delete");
         Shuffle = new JButton("Shuffle");
         Search = new JButton("Search");
         
         Play.addActionListener(buttonListener);
         Delete.addActionListener(buttonListener);
+        Pause.addActionListener(buttonListener);
+        Stop.addActionListener(buttonListener);
         Search.addActionListener(buttonListener);
-       
+        Next.addActionListener(buttonListener);
+        Previous.addActionListener(buttonListener);
+        //Repeat.addActionListener(buttonListener);
+        Shuffle.addActionListener(buttonListener);
         scrollPane = new JScrollPane(table);
         
         bottombtnPnl.add(Play, BorderLayout.CENTER);
         bottombtnPnl.add(Stop, BorderLayout.LINE_START);
         bottombtnPnl.add(Pause, BorderLayout.LINE_END);
         bottombtnPn2.add(Previous, BorderLayout.LINE_START);
-        bottombtnPn2.add(Repeat, BorderLayout.LINE_END);
+        //bottombtnPn2.add(Repeat, BorderLayout.LINE_END);
         bottombtnPn2.add(Delete, BorderLayout.CENTER);
         
         bottombtnPn3.add(Shuffle, BorderLayout.LINE_START);
@@ -221,13 +239,17 @@ public class App {
         btnPnl.add(bottombtnPnl, BorderLayout.CENTER);
         btnPnl.add(bottombtnPn2, BorderLayout.LINE_START);
         btnPnl.add(bottombtnPn3, BorderLayout.LINE_END);
+        
         main.add(textArea);
         main.setJMenuBar(mb);
-       
+        textArea.setText("Drop Songs Here To Add to Library");
         main.add(scrollPane, BorderLayout.NORTH);
         main.add(textArea, BorderLayout.CENTER);
         main.add(btnPnl, BorderLayout.SOUTH);
-        main.setSize(1500,700);
+        main.add(nowPlaying, BorderLayout.EAST);
+       
+       
+       
     }
     
     
@@ -275,6 +297,8 @@ public class App {
 
 	public void go(){
         main.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        main.setExtendedState(JFrame.MAXIMIZED_BOTH); 
+       // main.setUndecorated(true);
         main.setVisible(true);
     }
 
@@ -290,6 +314,9 @@ public class App {
         	int row = table.getSelectedRow();
             if("Play".equals(e.getActionCommand())){
             	try {
+            		String Title = table.getModel().getValueAt(row, 1).toString();
+            		String Artist = table.getModel().getValueAt(row, 2).toString();
+            		nowPlaying.setText("<html>Now Playing:  &nbsp;&nbsp; <br/>" + Title + "&nbsp;&nbsp;<br/> by &nbsp;&nbsp; <br/>" + Artist + "&nbsp;&nbsp;</html>");
             	    player.open(new URL("file:///" + table.getModel().getValueAt(row, column).toString()));
             	    player.play();
             	} catch (BasicPlayerException | MalformedURLException e1) {
@@ -299,14 +326,27 @@ public class App {
                   
             }
             if("Delete".equals(e.getActionCommand())){
-            	Query.deleteSong(table.getModel().getValueAt(row, column).toString());
-            	
-            	
-             	// i = the index of the selected row
-            	int i = table.getSelectedRow();
+            	String sk="";
+            	int i = table.getSelectedRowCount();
+            	   int[] rows = table.getSelectedRows();
+
             	if (i >= 0) {
-            	// remove a row from jtable
-            		tableModel.removeRow(i);
+
+            		System.out.println("THE NUMBER OF ROWS TO DELTE "+i);
+
+            		  for (int row3 = 0; row3<rows.length;row3++) {
+                			sk+= table.getModel().getValueAt(rows[row3], column).toString()+",";
+                			//System.out.println("ROWS FOR "+sk);
+                          }
+              		  sk=sk.substring(0, sk.length()-1);
+              		System.out.println("ROWS FOR "+sk);
+              		  Query.deleteSong(sk);
+              		int numRows = table.getSelectedRows().length;
+              		for(int t=0; t<numRows ; t++ ) {
+
+              		    tableModel.removeRow(table.getSelectedRow());
+              		}
+
             	} else {
             	System.out
             	.println("There were issue while Deleting the Row(s).");
@@ -316,13 +356,22 @@ public class App {
             }
             if("Search".equals(e.getActionCommand()))
             {
-            	String stk="";
+            	isPaused = false;
+            	String[] stk;
                 String name = JOptionPane.showInputDialog(main, "What is the name of the song?");//Note: input can be null.
+               // String Title = table.getModel().getValueAt(row, 1).toString();
+        		//String Artist = table.getModel().getValueAt(row, 2).toString();
+        		nowPlaying.setText("");
+        		
                 try {
 					stk=Query.searchSongByTitle(name);
-					System.out.println("The Search Path is  "+stk);
+					System.out.println("The Search Path is  "+stk[0]);
+					
+					nowPlaying.setText("<html>Now Playing: &nbsp;&nbsp;<br/>" + stk[1] + "&nbsp;&nbsp;<br/> by &nbsp;&nbsp;<br/>" + stk[2] + "&nbsp;&nbsp;</html>");
+					
+					
 	            	try {
-	            	    player.open(new URL("file:///" + stk));
+	            	    player.open(new URL("file:///" + stk[0]));
 	            	    player.play();
 	            	} catch (BasicPlayerException | MalformedURLException e1) {
 	            	    e1.printStackTrace();
@@ -333,9 +382,129 @@ public class App {
 				}
                 
             }
+            
+            if("Stop".contentEquals(e.getActionCommand()))
+            {
+            	isPaused = false;
+            	nowPlaying.setText("");
+            	try {
+					player.stop();
+				} catch (BasicPlayerException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+            }
+            if(e.getSource()==Pause)
+            {
+            	if(!isPaused) {              	
+                	try {
+    					player.pause();
+    					Pause.setText("Resume");
+    				} catch (BasicPlayerException e1) {
+    					// TODO Auto-generated catch block
+    					e1.printStackTrace();
+    				}
+            	}
+            	else if(isPaused){
+            		try {
+						player.resume();
+						Pause.setText("Pause");
+					} catch (BasicPlayerException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+            	}
+            	isPaused = !isPaused;
+            	
+            }
+            if("Next".contentEquals(e.getActionCommand()))
+            {
+            	row = row+1;
+            	String Title = table.getModel().getValueAt(row, 1).toString();
+        		String Artist = table.getModel().getValueAt(row, 2).toString();
+        		nowPlaying.setText("<html>Now Playing: &nbsp;&nbsp;<br/>" + Title + "&nbsp;&nbsp;<br/> by &nbsp;&nbsp;<br/>" + Artist + "&nbsp;&nbsp;</html>");
+            	table.changeSelection(row, column, false, false);
+            	isPaused = false;
+            	try {
+            		player.open(new URL("file:///" + table.getModel().getValueAt(row, column).toString()));
+            	    player.play();
+				} catch (BasicPlayerException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (MalformedURLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+            }
+            if("Previous".contentEquals(e.getActionCommand()))
+            {
+            	
+            	row = row-1;
+            	String Title = table.getModel().getValueAt(row, 1).toString();
+        		String Artist = table.getModel().getValueAt(row, 2).toString();
+        		nowPlaying.setText("<html>Now Playing: &nbsp;&nbsp;<br/>" + Title + "&nbsp;&nbsp;<br/> by &nbsp;&nbsp;<br/>" + Artist + "&nbsp;&nbsp;</html>");
+            	table.changeSelection(row, column, false, false);
+            	isPaused = false;
+            	try {
+            		player.open(new URL("file:///" + table.getModel().getValueAt(row, column).toString()));
+            	    player.play();
+				} catch (BasicPlayerException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (MalformedURLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+            }
+            /*if("Repeat".contentEquals(e.getActionCommand()))
+            {
+            	isPaused = false;
+            	
+            	try {
+            		player.open(new URL("file:///" + table.getModel().getValueAt(row, column).toString()));
+            	    player.play();
+				} catch (BasicPlayerException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (MalformedURLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+            }*/
+            if("Shuffle".contentEquals(e.getActionCommand()))
+            {
+            	isPaused = false;
+            	//calculating a random row number to play a random song
+            	Random rand = new Random();
+            	int min = 0 ;
+            	int max = table.getColumnCount();
+            	
+            	//selecting the song and setting label
+            	table.clearSelection();
+            	row = rand.nextInt((max-min) + 1) + min;
+            	table.addRowSelectionInterval(row, row);
 
-        } 
+            	String Title = table.getModel().getValueAt(row, 1).toString();
+        		String Artist = table.getModel().getValueAt(row, 2).toString();
+        		nowPlaying.setText("<html>Now Playing: &nbsp;&nbsp;<br/>" + Title + "&nbsp;&nbsp;<br/> by &nbsp;&nbsp;<br/>" + Artist + "&nbsp;&nbsp;</html>");
+        		
+            	try {
+            		player.open(new URL("file:///" + table.getModel().getValueAt(row, column).toString()));
+            	    player.play();
+				} catch (BasicPlayerException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				} catch (MalformedURLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+            }
+
+        }
+        
     }
+    
+   
     
 
     
@@ -396,6 +565,7 @@ public class App {
                }
          }
     }
+    
     class MyDragDropListener implements DropTargetListener {
 
         @Override
@@ -427,7 +597,7 @@ public class App {
                             // Print out the file path
                         	addSong(file1.getPath());
                         	Stk+=file1.getPath()+"\n";
-                        	textArea.setText(Stk);
+                        	//textArea.setText(Stk);
                             System.out.println("File path is '" + file1.getPath() + "'.");
 
                         }

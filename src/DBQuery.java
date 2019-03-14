@@ -25,43 +25,29 @@ public class DBQuery
     private static DatabaseMetaData dbm;
     Mp3File mp3file; 
     private static String dbURL ="jdbc:derby:codejava/webdb1;create=true";
-    public static void main(String[] args) throws UnsupportedTagException, InvalidDataException, IOException {
-    	DBQuery query = new DBQuery();
-    	query.createConnection();
-    	//query.createTable();
-    	//query.dropTable();
-    	//query.checkSong("D:\\eclipse-workspace\\SemesterTeamProject\\src\\Green Day-Give Me Novacaine.mp3");
-    	//query.checkSong("D:\\eclipse-workspace\\SemesterTeamProject\\src\\Green Day - American Idiot.mp3");
-    	//query.checkSong("D:\\eclipse-workspace\\SemesterTeamProject\\src\\Greenday - Boulevard Of Broken Dreams.mp3");
-      // insertSong("C:\\Doc\\Top.mp3");
-      // insertSong("C:\\Doc\\Down.mp3");
-       //deleteSong("D:\\eclipse-workspace\\SemesterTeamProject\\src\\STREETS OF RAGE.mp3");
-    	
-    	query.truncateTable();
-    	query.selectSong();
-    //	String[][] stk = query.dataDisplay();
-    	
-    	
-      // truncateTable();
-       // query.shutdown();
-    }
+   
     
 	/*
 	 * CREATES TABLE. ALSO CHECKS IF THE TABLE EXIST OR NOT. 
 	 */
     
     
-    public String searchSongByTitle(String Title) throws UnsupportedTagException, InvalidDataException, IOException
+    public String[] searchSongByTitle(String Title) throws UnsupportedTagException, InvalidDataException, IOException
     {
     	String path="";
+    	String title = "";
+    	String artist = "";
         try
         {
             stmt = conn.createStatement();
-            String Query="SELECT * FROM Music WHERE Title="+"'"+Title+"'";
+            String Query="SELECT * FROM Music WHERE UPPER(Title) LIKE UPPER('%"+Title+"%')";
             ResultSet result = stmt.executeQuery(Query);
+            
             if(result.next())
             {
             	path=result.getString(2);
+            	title = result.getString(3);
+            	artist = result.getString(4);
             }
             stmt.close();
         }
@@ -69,7 +55,7 @@ public class DBQuery
         {
             sqlExcept.printStackTrace();
         }
-        return path;
+        return new  String [] {path,title,artist};
     }
     public void createTable()
     {
@@ -161,7 +147,11 @@ public class DBQuery
             stmt = conn.createStatement();
             Title =FileName.substring(FileName.lastIndexOf('\\')+1, FileName.length());
             System.out.println("The Title is "+Title);
-            stmt.execute("DELETE FROM Music WHERE File="+"'"+FileName+"'");
+            String[] stk=FileName.split(",");
+            for(int k=0;k<stk.length;k++)
+            {
+            stmt.execute("DELETE FROM Music WHERE File = "+"'"+stk[k]+"'");
+            }
             stmt.close();
         }
         catch (SQLException sqlExcept)
