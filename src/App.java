@@ -332,7 +332,7 @@ public class App {
              	// i = the index of the selected row
             	int i = table.getSelectedRow();
             	if (i >= 0) {
-            	// remove a row from jtable
+            	// remove a row from table
             		tableModel.removeRow(i);
             	} else {
             	System.out
@@ -344,16 +344,21 @@ public class App {
             if("Search".equals(e.getActionCommand()))
             {
             	isPaused = false;
-            	String stk="";
+            	String[] stk;
                 String name = JOptionPane.showInputDialog(main, "What is the name of the song?");//Note: input can be null.
                // String Title = table.getModel().getValueAt(row, 1).toString();
         		//String Artist = table.getModel().getValueAt(row, 2).toString();
         		nowPlaying.setText("");
+        		
                 try {
 					stk=Query.searchSongByTitle(name);
-					System.out.println("The Search Path is  "+stk);
+					System.out.println("The Search Path is  "+stk[0]);
+					
+					nowPlaying.setText("<html>Now Playing: &nbsp;&nbsp;<br/>" + stk[1] + "&nbsp;&nbsp;<br/> by &nbsp;&nbsp;<br/>" + stk[2] + "&nbsp;&nbsp;</html>");
+					
+					
 	            	try {
-	            	    player.open(new URL("file:///" + stk));
+	            	    player.open(new URL("file:///" + stk[0]));
 	            	    player.play();
 	            	} catch (BasicPlayerException | MalformedURLException e1) {
 	            	    e1.printStackTrace();
@@ -579,7 +584,7 @@ public class App {
                             // Print out the file path
                         	addSong(file1.getPath());
                         	Stk+=file1.getPath()+"\n";
-                        	textArea.setText(Stk);
+                        	//textArea.setText(Stk);
                             System.out.println("File path is '" + file1.getPath() + "'.");
 
                         }

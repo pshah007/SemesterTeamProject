@@ -32,17 +32,22 @@ public class DBQuery
 	 */
     
     
-    public String searchSongByTitle(String Title) throws UnsupportedTagException, InvalidDataException, IOException
+    public String[] searchSongByTitle(String Title) throws UnsupportedTagException, InvalidDataException, IOException
     {
     	String path="";
+    	String title = "";
+    	String artist = "";
         try
         {
             stmt = conn.createStatement();
-            String Query="SELECT * FROM Music WHERE Title LIKE "+"'%"+Title+"%'";
+            String Query="SELECT * FROM Music WHERE UPPER(Title) LIKE UPPER('%"+Title+"%')";
             ResultSet result = stmt.executeQuery(Query);
+            
             if(result.next())
             {
             	path=result.getString(2);
+            	title = result.getString(3);
+            	artist = result.getString(4);
             }
             stmt.close();
         }
@@ -50,7 +55,7 @@ public class DBQuery
         {
             sqlExcept.printStackTrace();
         }
-        return path;
+        return new  String [] {path,title,artist};
     }
     public void createTable()
     {
