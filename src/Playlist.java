@@ -50,15 +50,10 @@ import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
-import javax.swing.JTree;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
-import javax.swing.tree.DefaultMutableTreeNode;
-import javax.swing.tree.DefaultTreeModel;
-import javax.swing.tree.MutableTreeNode;
-import javax.swing.tree.TreeSelectionModel;
 
 import com.mpatric.mp3agic.ID3v1;
 import com.mpatric.mp3agic.InvalidDataException;
@@ -70,28 +65,20 @@ import javazoom.jlgui.basicplayer.BasicController;
 import javazoom.jlgui.basicplayer.BasicPlayer;
 import javazoom.jlgui.basicplayer.BasicPlayerException;
 
-/**
- *
- * @author Daddy
- */
-public class App {
-    
 
+public class Playlist {
+    
+    
     static JFrame  main = new JFrame("AudioPlayer");
     static JTable table;
     JPanel bottombtnPnl;
     JPanel bottombtnPn2;
     JPanel bottombtnPn3;
     JPanel bottombtnPnx;
-    JPanel mainPanel;
-    JPanel left;
-    JPanel right;
     ButtonListener buttonListener;
-    static JTree tree;
+    
     
     JScrollPane scrollPane; 
-    static JScrollPane scrollLibrary; 
-    
     int CurrentSelectedRow;
     JButton Play;
     JButton Pause;
@@ -103,24 +90,23 @@ public class App {
     JButton Delete;
     JButton Search;
     JPanel btnPnl;
-    static DefaultMutableTreeNode top ;
     static BasicPlayer player;
     BasicController control ;
     static String[][] data;
-    static String[] columns = new String[8];
+    static String[] columns = new String[7];
     static DefaultTableModel tableModel;
-    static DefaultTreeModel model;
-    static DefaultMutableTreeNode  root;
     static DBQuery Query;
     final JTextArea textArea;
     static boolean isPaused = false;
     JLabel nowPlaying = new JLabel("");
 
-    
-	   
-	    
 
-    public App(){
+	
+    
+    /**
+     * 
+     */
+    public Playlist(){
     	
     	/*
     	 * ADDING MENU BAR NAME FILE WHICH WILL CONTAIN NEW,OPEN,EXIT
@@ -161,10 +147,7 @@ public class App {
     	  * bottombtnPn2 CONTAINS PREVIOUS,REPEAT,DELETE
     	  * bottombtnPn3 CONTAINS Shuffle,SEARCH,NEXT
     	  */
-    	mainPanel = new JPanel(new BorderLayout(0, 0));
-    	left = new JPanel(new BorderLayout(0, 0));
-    	right = new JPanel(new BorderLayout(0, 0));
-    	
+   
     	bottombtnPnl = new JPanel();
     	bottombtnPnl.setLayout(new BorderLayout(0, 0));
     	bottombtnPn2 = new JPanel();
@@ -185,14 +168,12 @@ public class App {
     	columns[4] ="GENERE";
     	columns[5] ="YEAR";
     	columns[6] ="LENGTH";
-    	columns[7] ="PLAYLIST";
     	player = new BasicPlayer();
         control = (BasicController) player;
       
           //data holds the table data and maps as a 2d array into the table
           data = Query.dataDisplay();
           
-
           
           
           tableModel= new DefaultTableModel(data, columns);
@@ -228,7 +209,6 @@ public class App {
         
         buttonListener = new ButtonListener();
         Play = new JButton("Play");
-        
         Pause = new JButton("Pause");
         Stop = new JButton("Stop");
         Previous = new JButton("Previous");
@@ -248,7 +228,6 @@ public class App {
         //Repeat.addActionListener(buttonListener);
         Shuffle.addActionListener(buttonListener);
         scrollPane = new JScrollPane(table);
-        
         
         bottombtnPnl.add(Play, BorderLayout.CENTER);
         bottombtnPnl.add(Stop, BorderLayout.LINE_START);
@@ -276,54 +255,22 @@ public class App {
 			}
 		});
         
-        
-        
-        	top = new DefaultMutableTreeNode("Library");
-            createNodes(top);
-            
-            //Create a tree that allows one selection at a time.
-            tree = new JTree(top);
-            tree.getSelectionModel().setSelectionMode
-                    (TreeSelectionModel.SINGLE_TREE_SELECTION);
-            scrollLibrary = new JScrollPane(tree);
-           model = (DefaultTreeModel)tree.getModel();
-            root = (DefaultMutableTreeNode)model.getRoot();
-        
-        
-        right.add(textArea);
+        main.add(textArea);
         main.setJMenuBar(mb);
         textArea.setText("Drop Songs Here To Add to Library");
-        right.add(scrollPane, BorderLayout.NORTH);
-        right.add(textArea, BorderLayout.CENTER);
-        right.add(nowPlaying, BorderLayout.EAST);
-        right.add(btnPnl, BorderLayout.SOUTH);
-        mainPanel.add(right, BorderLayout.CENTER);
-        
-        left.add(scrollLibrary);
-        //left.setSize(640,0);
-        mainPanel.add(left,BorderLayout.WEST);
-        main.add(mainPanel);
-        //main.add(textArea, BorderLayout.WEST);
-       
-       
+        main.add(scrollPane, BorderLayout.NORTH);
+        main.add(textArea, BorderLayout.CENTER);
+        main.add(btnPnl, BorderLayout.SOUTH);
+        main.add(nowPlaying, BorderLayout.EAST);
+        main.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        main.setExtendedState(JFrame.MAXIMIZED_BOTH); 
+       // main.setUndecorated(true);
+        main.setVisible(true);
        
     }
     
-    private static void createNodes(DefaultMutableTreeNode top) {
-        DefaultMutableTreeNode category2 = null;
-        int nRow = table.getRowCount();
-        for (int i = 0 ; i < nRow ; i++)
-        {
-        	category2 = new DefaultMutableTreeNode(table.getModel().getValueAt(i, 1).toString());
-        	top.add(category2);
-        }
-        
-
-
-    }
     
-    
-    public static void addSong(String fileName,String Playlist) throws UnsupportedTagException, InvalidDataException, IOException
+    public static void addSong(String fileName) throws UnsupportedTagException, InvalidDataException, IOException
     {
         Mp3File mp3file = new Mp3File(fileName);
         String Title =fileName.substring(fileName.lastIndexOf('\\')+1, fileName.length());
@@ -333,6 +280,7 @@ public class App {
         String Genere = " ";
         String Year="";
         String Length = "";
+        String Playlist = "";
     	if (mp3file.hasId3v1Tag()) {
     		  ID3v1 id3v1Tag = mp3file.getId3v1Tag();
 			  System.out.println("Title: " + id3v1Tag.getTitle());
@@ -358,23 +306,11 @@ public class App {
     		            break;
     		        }
     		    }
-
-    	        
-
     		   if(check==0)
     		   {
-    			   String[] rown = { fileName, Title,Artist,Album,Genere,Year,Length,Playlist};
+    			   String[] rown = { fileName, Title,Artist,Album,Genere,Year,Length,Playlist };
     			   tableModel.addRow(rown);
-    			   
     		   }
-    		   
-
-   		    root.removeAllChildren();
-   		    System.out.println("ABOUT TO PRINT TABLE ROW COUNT BEFORE DEFUALTMUTABLETTREENODE "+table.getRowCount());
-    		   for (int i = 0; i < table.getRowCount(); i++) {
-    			  root.add(new DefaultMutableTreeNode(table.getModel().getValueAt(i, 1).toString()));
-		    }
-   	        model.reload(root);
     }
 
 	public void go(){
@@ -409,51 +345,27 @@ public class App {
             }
             if("Delete".equals(e.getActionCommand())){
             	String sk="";
-            	String pl="";
             	int i = table.getSelectedRowCount();
-            	
-            
-            	int rows = table.getSelectedRow();
+            	   int[] rows = table.getSelectedRows();
 
             	if (i >= 0) {
 
-            		System.out.println("THE NUMBER OF ROWS TO DELETE "+i);
+            		System.out.println("THE NUMBER OF ROWS TO DELTE "+i);
 
-            		 // for (int row3 = 0; row3<rows.length;row3++) {
-                			sk= table.getModel().getValueAt(rows, column).toString(); //-+",";
-                			pl= table.getModel().getValueAt(rows, 7).toString(); //",";
-                			System.out.println("THE PLAYLIST NAME TO DELTE "+pl);
+            		  for (int row3 = 0; row3<rows.length;row3++) {
+                			sk+= table.getModel().getValueAt(rows[row3], column).toString()+",";
                 			//System.out.println("ROWS FOR "+sk);
-                        //  }
-              		 // sk=sk.substring(0, sk.length()-1);
+                          }
+              		  sk=sk.substring(0, sk.length()-1);
               		System.out.println("ROWS FOR "+sk);
-              		  Query.deleteSongFromPlaylist(sk,pl);
-              	//	int numRows = table.getSelectedRows().length;
-              	//	for(int t=0; t<numRows ; t++ ) {
-              		  	tableModel.removeRow(table.getSelectedRow());
-              		  	
-             		    //model.remove(new DefaultMutableTreeNode(table.getSelectedRow()));
-              		 // System.out.println("ABOUT TO COUNT CHILD FOR ROOT BEFORE"+ root.getChildCount());
-             		    root.removeAllChildren();
-             		 // System.out.println("ABOUT TO COUNT CHILD FOR ROOT AFTER"+ root.getChildCount());
-             		 //   System.out.println("ABOUT TO PRINT TABLE ROW COUNT BEFORE DELETE "+table.getRowCount());
-             		    
-              		   for (int t = 0; t < table.getRowCount(); t++) {
-              			  root.add(new DefaultMutableTreeNode(table.getModel().getValueAt(t, 1).toString()));
-          		    }
-              		// System.out.println("ABOUT TO COUNT CHILD FOR ROOT AFTER ADDING "+ root.getChildCount());
+              		  Query.deleteSong(sk);
+              		int numRows = table.getSelectedRows().length;
+              		for(int t=0; t<numRows ; t++ ) {
 
-              		 model.reload(root);
-             		   
+              		    tableModel.removeRow(table.getSelectedRow());
+              		}
 
-              		    
-              		    
-              	//	}
-
-            	}
-            	
-            
-            	else {
+            	} else {
             	System.out
             	.println("There were issue while Deleting the Row(s).");
             	}
@@ -646,10 +558,9 @@ public class App {
                if (chooser.showOpenDialog(main) == JFileChooser.APPROVE_OPTION) {
             	   File file = chooser.getSelectedFile();
             	    DefaultTableModel contactTableModel = (DefaultTableModel) table.getModel();
-            	   
             	   System.out.println(file.getPath());
             	   try {
-					addSong(file.getPath(),"Main");
+					addSong(file.getPath());
 				} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -685,7 +596,20 @@ public class App {
         public void actionPerformed(ActionEvent e)
         {
         	
-        	Playlist playlist = new Playlist();
+        	   JFileChooser chooser = new JFileChooser();
+               if (chooser.showOpenDialog(main) == JFileChooser.APPROVE_OPTION) {
+            	   File file = chooser.getSelectedFile();
+            	    DefaultTableModel contactTableModel = (DefaultTableModel) table.getModel();
+            	    try {
+            	    player.open(new URL("file:///" + file.getPath()));
+            	    player.play();
+            	    }
+             	   catch (BasicPlayerException | MalformedURLException e2) {
+	            	    e2.printStackTrace();
+	            	}
+            	    
+
+               }
          }
     }
     
@@ -720,7 +644,7 @@ public class App {
                         for (File file1 : file) {
 
                             // Print out the file path
-                        	addSong(file1.getPath(),"Main");
+                        	addSong(file1.getPath());
                         	Stk+=file1.getPath()+"\n";
                         	//textArea.setText(Stk);
                             System.out.println("File path is '" + file1.getPath() + "'.");
@@ -770,40 +694,26 @@ public class App {
     			public void actionPerformed(ActionEvent arg0) {
     				/*JOptionPane.showMessageDialog(add, "Deleted");*/
     				String sk="";
-    				String pl="";
     				int column = 0;
                 	int i = table.getSelectedRowCount();
-                	   int rows = table.getSelectedRow();
+                	   int[] rows = table.getSelectedRows();
 
                 	if (i >= 0) {
 
                 		System.out.println("THE NUMBER OF ROWS TO DELTE "+i);
 
-                	//	  for (int row3 = 0; row3<rows.length;row3++) {
-                    			sk= table.getModel().getValueAt(rows, column).toString();//+",";
-                    			pl= table.getModel().getValueAt(rows, 7).toString();//+",";
+                		  for (int row3 = 0; row3<rows.length;row3++) {
+                    			sk+= table.getModel().getValueAt(rows[row3], column).toString()+",";
                     			//System.out.println("ROWS FOR "+sk);
-                      //        }
-                  		 // sk=sk.substring(0, sk.length()-1);
-                  		//System.out.println("ROWS FOR "+sk);
-                  		  Query.deleteSongFromPlaylist(sk, pl);
-                  		//int numRows = table.getSelectedRows().length;
-                  		//for(int t=0; t<numRows ; t++ ) {
+                              }
+                  		  sk=sk.substring(0, sk.length()-1);
+                  		System.out.println("ROWS FOR "+sk);
+                  		  Query.deleteSong(sk);
+                  		int numRows = table.getSelectedRows().length;
+                  		for(int t=0; t<numRows ; t++ ) {
 
                   		    tableModel.removeRow(table.getSelectedRow());
-                  		//}
-                 		    //model.remove(new DefaultMutableTreeNode(table.getSelectedRow()));
-                     		 // System.out.println("ABOUT TO COUNT CHILD FOR ROOT BEFORE"+ root.getChildCount());
-                    		    root.removeAllChildren();
-                    		 // System.out.println("ABOUT TO COUNT CHILD FOR ROOT AFTER"+ root.getChildCount());
-                    		 //   System.out.println("ABOUT TO PRINT TABLE ROW COUNT BEFORE DELETE "+table.getRowCount());
-                    		    
-                     		   for (int t = 0; t < table.getRowCount(); t++) {
-                     			  root.add(new DefaultMutableTreeNode(table.getModel().getValueAt(t, 1).toString()));
-                 		    }
-                     		// System.out.println("ABOUT TO COUNT CHILD FOR ROOT AFTER ADDING "+ root.getChildCount());
-
-                     		 model.reload(root);
+                  		}
 
                 	} else {
                 	System.out
