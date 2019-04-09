@@ -37,6 +37,8 @@ import javax.sound.sampled.AudioSystem;
 import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
+import javax.swing.Box;
+import javax.swing.BoxLayout;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
@@ -88,9 +90,12 @@ public class App {
     JPanel right;
     ButtonListener buttonListener;
     static JTree tree;
+    static JTree tree2;
     
     JScrollPane scrollPane; 
     static JScrollPane scrollLibrary; 
+    static JScrollPane scrollPlaylist; 
+    
     
     int CurrentSelectedRow;
     JButton Play;
@@ -104,6 +109,7 @@ public class App {
     JButton Search;
     JPanel btnPnl;
     static DefaultMutableTreeNode top ;
+    static DefaultMutableTreeNode top2 ;
     static BasicPlayer player;
     BasicController control ;
     static String[][] data;
@@ -279,15 +285,64 @@ public class App {
         
         
         	top = new DefaultMutableTreeNode("Library");
+        	top2 = new DefaultMutableTreeNode("Playlist");
+        	
             createNodes(top);
-            
             //Create a tree that allows one selection at a time.
             tree = new JTree(top);
-            tree.getSelectionModel().setSelectionMode
-                    (TreeSelectionModel.SINGLE_TREE_SELECTION);
-            scrollLibrary = new JScrollPane(tree);
-           model = (DefaultTreeModel)tree.getModel();
-            root = (DefaultMutableTreeNode)model.getRoot();
+            tree2 = new JTree(top2);
+            
+       	 	model = (DefaultTreeModel)tree.getModel();
+       	 	root = (DefaultMutableTreeNode)model.getRoot();
+       	 	
+           // tree.getSelectionModel().setSelectionMode
+            //        (TreeSelectionModel.SINGLE_TREE_SELECTION);
+            
+          //  tree2.getSelectionModel().setSelectionMode
+           // (TreeSelectionModel.SINGLE_TREE_SELECTION);
+            
+       	 	
+            //JPanel pContainer = new JPanel(new BorderLayout(0, 0));
+            //pContainer.add(tree);
+            //pContainer.setSize(new Dimension(0, 10));
+            
+            //JPanel pContainer2 = new JPanel(new BorderLayout(0, 0));
+            //pContainer2.add(tree2);
+            //pContainer2.setSize(new Dimension(0, 10));
+       	 	
+            JPanel pContainer1 = new JPanel();
+            BoxLayout boxLayout = new BoxLayout(pContainer1, BoxLayout.Y_AXIS);
+            pContainer1.setLayout(boxLayout);
+            pContainer1.add(tree);
+            //pContainer1.add(Box.createRigidArea(new Dimension(0, -10)));
+            pContainer1.add(tree2);
+            
+
+            
+
+            
+            
+           // boxLayout.getLayoutAlignmentX(pContainer);
+            //pContainer.setAlignmentX(Component.CENTER_ALIGNMENT);
+          //  pContainer.add(tree);
+           // pContainer.add(tree2);
+            
+
+            
+
+           
+           // pContainer.add(tree2);
+           // pContainer.setPreferredSize(new Dimension(640, 480));
+            //scrollLibrary = new JScrollPane(pContainer);
+            //scrollLibrary.setLayout(new BorderLayout(0, 0));
+            //scrollLibrary.add(pContainer,BorderLayout.CENTER);
+            //scrollPlaylist = new JScrollPane(tree2);
+            //model.setRoot(top2);
+            //tree.add(tree2);
+            //scrollPlaylist = new JScrollPane(tree2);
+
+            //scrollLibrary.add(tree2);
+            
         
         
         right.add(textArea);
@@ -299,8 +354,9 @@ public class App {
         right.add(btnPnl, BorderLayout.SOUTH);
         mainPanel.add(right, BorderLayout.CENTER);
         
-        left.add(scrollLibrary);
-        //left.setSize(640,0);
+        left.add(pContainer1,BorderLayout.CENTER);
+      // left.add(scrollPlaylist,BorderLayout.SOUTH);
+        
         mainPanel.add(left,BorderLayout.WEST);
         main.add(mainPanel);
         //main.add(textArea, BorderLayout.WEST);
