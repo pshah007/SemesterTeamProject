@@ -8,6 +8,7 @@
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.Toolkit;
 import java.util.List;
 import java.util.Random;
@@ -86,37 +87,30 @@ public class App {
     JPanel bottombtnPn3;
     JPanel bottombtnPnx;
     JPanel mainPanel;
-    JPanel left;
     JPanel right;
-    ButtonListener buttonListener;
-    static JTree tree;
-    static JTree tree2;
-    
+    ButtonListener buttonListener;    
     JScrollPane scrollPane; 
     static JScrollPane scrollLibrary; 
     static JScrollPane scrollPlaylist; 
-    
-    
     int CurrentSelectedRow;
     JButton Play;
     JButton Pause;
     JButton Stop;
     JButton Previous;
     JButton Next;
-    //JButton Repeat;
     JButton Shuffle;
     JButton Delete;
     JButton Search;
     JPanel btnPnl;
-    static DefaultMutableTreeNode top ;
-    static DefaultMutableTreeNode top2 ;
+    static DefaultMutableTreeNode root ;
+    static DefaultMutableTreeNode library ;
+    static DefaultMutableTreeNode playlist ;
     static BasicPlayer player;
     BasicController control ;
     static String[][] data;
     static String[] columns = new String[8];
     static DefaultTableModel tableModel;
     static DefaultTreeModel model;
-    static DefaultMutableTreeNode  root;
     static DBQuery Query;
     final JTextArea textArea;
     static boolean isPaused = false;
@@ -168,7 +162,7 @@ public class App {
     	  * bottombtnPn3 CONTAINS Shuffle,SEARCH,NEXT
     	  */
     	mainPanel = new JPanel(new BorderLayout(0, 0));
-    	left = new JPanel(new BorderLayout(0, 0));
+    	//left = new JPanel(new BorderLayout(0, 0));
     	right = new JPanel(new BorderLayout(0, 0));
     	
     	bottombtnPnl = new JPanel();
@@ -282,68 +276,25 @@ public class App {
 			}
 		});
         
-        
-        
-        	top = new DefaultMutableTreeNode("Library");
-        	top2 = new DefaultMutableTreeNode("Playlist");
         	
-            createNodes(top);
-            //Create a tree that allows one selection at a time.
-            tree = new JTree(top);
-            tree2 = new JTree(top2);
-            
-       	 	model = (DefaultTreeModel)tree.getModel();
-       	 	root = (DefaultMutableTreeNode)model.getRoot();
-       	 	
-           // tree.getSelectionModel().setSelectionMode
-            //        (TreeSelectionModel.SINGLE_TREE_SELECTION);
-            
-          //  tree2.getSelectionModel().setSelectionMode
-           // (TreeSelectionModel.SINGLE_TREE_SELECTION);
-            
-       	 	
-            //JPanel pContainer = new JPanel(new BorderLayout(0, 0));
-            //pContainer.add(tree);
-            //pContainer.setSize(new Dimension(0, 10));
-            
-            //JPanel pContainer2 = new JPanel(new BorderLayout(0, 0));
-            //pContainer2.add(tree2);
-            //pContainer2.setSize(new Dimension(0, 10));
-       	 	
-            JPanel pContainer1 = new JPanel();
-            BoxLayout boxLayout = new BoxLayout(pContainer1, BoxLayout.Y_AXIS);
-            pContainer1.setLayout(boxLayout);
-            pContainer1.add(tree);
-            //pContainer1.add(Box.createRigidArea(new Dimension(0, -10)));
-            pContainer1.add(tree2);
-            
-
-            
-
-            
-            
-           // boxLayout.getLayoutAlignmentX(pContainer);
-            //pContainer.setAlignmentX(Component.CENTER_ALIGNMENT);
-          //  pContainer.add(tree);
-           // pContainer.add(tree2);
-            
-
-            
-
-           
-           // pContainer.add(tree2);
-           // pContainer.setPreferredSize(new Dimension(640, 480));
-            //scrollLibrary = new JScrollPane(pContainer);
-            //scrollLibrary.setLayout(new BorderLayout(0, 0));
-            //scrollLibrary.add(pContainer,BorderLayout.CENTER);
-            //scrollPlaylist = new JScrollPane(tree2);
-            //model.setRoot(top2);
-            //tree.add(tree2);
-            //scrollPlaylist = new JScrollPane(tree2);
-
-            //scrollLibrary.add(tree2);
-            
+        //making tree on the left side
+    	root = new DefaultMutableTreeNode("Root");
+    	library = new DefaultMutableTreeNode("Library");
+    	playlist = new DefaultMutableTreeNode("Playlists");
+    	
+        createNodes(library);
+        //Create a tree that allows one selection at a time.
+        root.add(library);
+        root.add(playlist);
+        JTree treeForLeft = new JTree(root);
+        treeForLeft.setRootVisible(false);
+    	
+        model = (DefaultTreeModel)treeForLeft.getModel();
         
+    	JScrollPane treePane = new JScrollPane(treeForLeft);
+        treePane.setPreferredSize(new Dimension(200,1000));
+       
+  
         
         right.add(textArea);
         main.setJMenuBar(mb);
@@ -353,13 +304,11 @@ public class App {
         right.add(nowPlaying, BorderLayout.EAST);
         right.add(btnPnl, BorderLayout.SOUTH);
         mainPanel.add(right, BorderLayout.CENTER);
-        
-        left.add(pContainer1,BorderLayout.CENTER);
-      // left.add(scrollPlaylist,BorderLayout.SOUTH);
-        
-        mainPanel.add(left,BorderLayout.WEST);
+        //left.setPreferredSize(new Dimension(200,200));
+        //left.add(pContainer1, BorderLayout.CENTER);
+        mainPanel.add(treePane,BorderLayout.WEST);
         main.add(mainPanel);
-        //main.add(textArea, BorderLayout.WEST);
+       
        
        
        
@@ -425,12 +374,12 @@ public class App {
     		   }
     		   
 
-   		    root.removeAllChildren();
+   		    library.removeAllChildren();
    		    System.out.println("ABOUT TO PRINT TABLE ROW COUNT BEFORE DEFUALTMUTABLETTREENODE "+table.getRowCount());
     		   for (int i = 0; i < table.getRowCount(); i++) {
-    			  root.add(new DefaultMutableTreeNode(table.getModel().getValueAt(i, 1).toString()));
+    			  library.add(new DefaultMutableTreeNode(table.getModel().getValueAt(i, 1).toString()));
 		    }
-   	        model.reload(root);
+   	        model.reload(library);
     }
 
 	public void go(){

@@ -27,16 +27,16 @@ public class DBQuery
     private static String dbURL ="jdbc:derby:codejava/webdb1;create=true";
    
 
-   /*
-    public static void main(String[] args) {
+   
+   /* public static void main(String[] args) {
     	
     	DBQuery query = new DBQuery();
-    	//query.createConnection();
-    	//query.dropTable();
+    	query.createConnection();
+    	query.dropTable();
     	//query.createTable();
     	//query.selectSong();
-    }
-    */
+    }*/
+    
     
     
     public String[] searchSongByTitle(String Title) throws UnsupportedTagException, InvalidDataException, IOException
