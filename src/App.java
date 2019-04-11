@@ -130,11 +130,11 @@ public class App {
     	JMenuItem New = new JMenuItem("Add To Library");
     	JMenuItem Open = new JMenuItem("Open A Song");
     	JMenuItem Exit = new JMenuItem("Exit");
-    	JMenuItem cplay= new JMenuItem("Create Playlist");
+    	JMenuItem createPlaylist= new JMenuItem("Create Playlist");
     	
     	menu.add(New);
     	menu.add(Open);
-    	menu.add(cplay);
+    	menu.add(createPlaylist);
     	menu.add(Exit);
 
 
@@ -143,7 +143,7 @@ public class App {
     	Exit.addActionListener(new exitJmenuButton());
     	New.addActionListener(new newJmenuButton());
     	Open.addActionListener(new openJmenuButton());
-    	cplay.addActionListener(new cplayJmenuButton());
+    	createPlaylist.addActionListener(new createPlaylistJmenuButton());
     	main.pack();
     	
     	/*
@@ -685,7 +685,7 @@ public class App {
          }
     }
     
-    static class cplayJmenuButton implements ActionListener
+    static class createPlaylistJmenuButton implements ActionListener
     {
         public void actionPerformed(ActionEvent e)
         {
@@ -768,7 +768,42 @@ public class App {
     	public RowPopup(JTable table) {
     		JMenuItem add = new JMenuItem("Add");
     		JMenuItem delete = new JMenuItem("Delete");
-    		add.addActionListener(new newJmenuButton());
+    		add.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					// TODO Auto-generated method stub
+					
+		        	System.out.println("Yes this is the one");
+		        	   JFileChooser chooser = new JFileChooser();
+		               if (chooser.showOpenDialog(main) == JFileChooser.APPROVE_OPTION) {
+		            	   File file = chooser.getSelectedFile();
+		            	    DefaultTableModel contactTableModel = (DefaultTableModel) table.getModel();
+		            	   
+		            	   System.out.println(file.getPath());
+		            	   try {
+							addSong(file.getPath(),"Main");
+						} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+		               }
+		               //model.remove(new DefaultMutableTreeNode(table.getSelectedRow()));
+               		 // System.out.println("ABOUT TO COUNT CHILD FOR ROOT BEFORE"+ root.getChildCount());
+              		    library.removeAllChildren();
+              		 // System.out.println("ABOUT TO COUNT CHILD FOR ROOT AFTER"+ root.getChildCount());
+              		 //   System.out.println("ABOUT TO PRINT TABLE ROW COUNT BEFORE DELETE "+table.getRowCount());
+              		    
+               		   for (int t = 0; t < table.getRowCount(); t++) {
+               			  library.add(new DefaultMutableTreeNode(table.getModel().getValueAt(t, 1).toString()));
+           		    }
+               		// System.out.println("ABOUT TO COUNT CHILD FOR ROOT AFTER ADDING "+ root.getChildCount());
+
+               		 model.reload(library);
+
+				}
+    			
+    		});
     		delete.addActionListener(new ActionListener() {
 
     			@Override
@@ -799,16 +834,16 @@ public class App {
                   		//}
                  		    //model.remove(new DefaultMutableTreeNode(table.getSelectedRow()));
                      		 // System.out.println("ABOUT TO COUNT CHILD FOR ROOT BEFORE"+ root.getChildCount());
-                    		    root.removeAllChildren();
+                    		    library.removeAllChildren();
                     		 // System.out.println("ABOUT TO COUNT CHILD FOR ROOT AFTER"+ root.getChildCount());
                     		 //   System.out.println("ABOUT TO PRINT TABLE ROW COUNT BEFORE DELETE "+table.getRowCount());
                     		    
                      		   for (int t = 0; t < table.getRowCount(); t++) {
-                     			  root.add(new DefaultMutableTreeNode(table.getModel().getValueAt(t, 1).toString()));
+                     			  library.add(new DefaultMutableTreeNode(table.getModel().getValueAt(t, 1).toString()));
                  		    }
                      		// System.out.println("ABOUT TO COUNT CHILD FOR ROOT AFTER ADDING "+ root.getChildCount());
 
-                     		 model.reload(root);
+                     		 model.reload(library);
 
                 	} else {
                 	System.out
