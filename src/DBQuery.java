@@ -27,16 +27,24 @@ public class DBQuery
     private static String dbURL ="jdbc:derby:codejava/webdb1;create=true";
    
 
-   
-   /* public static void main(String[] args) {
+   /*
+    public static void main(String[] args) throws UnsupportedTagException, InvalidDataException, IOException {
     	
     	DBQuery query = new DBQuery();
     	query.createConnection();
-    	query.dropTable();
+    	//query.dropTable();
+    	//query.createTable();
+    	query.insertSong("TEST","TEST","TEST","TEST","TEST","1900","1","TESTPLAY");
+    	query.insertSong("TEST","TEST","TEST","TEST","TEST","1900","1","TESTPLAY2");
+    	String[] stk=query.playlistDisplay();
+    	for(int x = 0 ; x < stk.length ; x++)
+    	{
+    		System.out.println(stk[x]);
+    	}
     	//query.createTable();
     	//query.selectSong();
-    }*/
-    
+    }
+    */
     
     
     public String[] searchSongByTitle(String Title) throws UnsupportedTagException, InvalidDataException, IOException
@@ -129,27 +137,7 @@ public class DBQuery
         }
     }
     
-    
-    public void checkSong(String FileName,String Title,String Artist, String Album,String Genere,String Year,String Length,String Playlist) throws UnsupportedTagException, InvalidDataException, IOException
-    {
-    	
-        try
-        {
-            stmt = conn.createStatement();
-            String Query="SELECT * FROM Music WHERE File="+"'"+FileName+"'"+" AND Playlist = "+"'"+Playlist+"'" ;
-            ResultSet result = stmt.executeQuery(Query);
-            System.out.println(result);
-            if(!result.next())
-            {
-            	insertSong(FileName,Title,Artist,Album,Genere,Year,Length,Playlist);
-            }
-            stmt.close();
-        }
-        catch (SQLException sqlExcept)
-        {
-            sqlExcept.printStackTrace();
-        }	
-    }
+   
     
     public void createConnection()
     {
@@ -426,6 +414,40 @@ public class DBQuery
 	    	    stk[t][7] = results.getString(10);
 	    	    t++;
 	        }
+    	}
+		
+        catch (SQLException sqlExcept)
+        {
+            sqlExcept.printStackTrace();
+        }
+    	return stk;
+    }
+    
+    public String[] playlistDisplay() 
+    {
+    	String[] stk = null;
+    	try {
+	        stmt = conn.createStatement();
+	        results = stmt.executeQuery("select count(DISTINCT Playlist) AS rowcount from MUSIC");
+	        int numberRows=0;
+            while (results.next()){
+            	numberRows = results.getInt(1);
+            }
+            if(numberRows>0)
+	        
+            {
+		        results = stmt.executeQuery("select DISTINCT Playlist from MUSIC");
+		        ResultSetMetaData rsmd = results.getMetaData();
+	
+		        stk = new String[numberRows];
+		        
+		        int t=0;
+		        while(results.next())
+		        {
+		        	stk[t] = results.getString(1);
+		    	    t++;
+		        }
+            }
     	}
 		
         catch (SQLException sqlExcept)

@@ -10,6 +10,7 @@ import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Toolkit;
+import java.util.Enumeration;
 import java.util.List;
 import java.util.Random;
 import java.awt.datatransfer.DataFlavor;
@@ -280,21 +281,32 @@ public class App {
         //making tree on the left side
     	root = new DefaultMutableTreeNode("Root");
     	library = new DefaultMutableTreeNode("Library");
-    	playlist = new DefaultMutableTreeNode("Playlists");
+    	playlist = new DefaultMutableTreeNode("Playlist");
     	
-        createNodes(library);
+    	
+        
         //Create a tree that allows one selection at a time.
         root.add(library);
         root.add(playlist);
+        createPlaylistnode(playlist);
         JTree treeForLeft = new JTree(root);
         treeForLeft.setRootVisible(false);
     	
+        treeForLeft.addMouseListener(new MouseAdapter() {
+			public void mouseClicked(MouseEvent me) {
+				if(SwingUtilities.isRightMouseButton(me)) {
+					pop.show(me.getComponent(), me.getX(), me.getY() );
+				}
+			}
+		});
+        
+        
         model = (DefaultTreeModel)treeForLeft.getModel();
         
     	JScrollPane treePane = new JScrollPane(treeForLeft);
         treePane.setPreferredSize(new Dimension(200,1000));
        
-  
+        
         
         right.add(textArea);
         main.setJMenuBar(mb);
@@ -322,9 +334,19 @@ public class App {
         	category2 = new DefaultMutableTreeNode(table.getModel().getValueAt(i, 1).toString());
         	top.add(category2);
         }
-        
-
-
+    }
+     public static void createPlaylistnode(DefaultMutableTreeNode top) {
+			String[] stk1 =Query.playlistDisplay();
+			//System.out.println(stk1.length);
+			if(stk1.length>0)
+			{
+                    for (int k = 0 ; k < stk1.length ; k++)
+                    {
+                    	//System.out.println(stk1[k]);
+                    	DefaultMutableTreeNode category2 = new DefaultMutableTreeNode(stk1[k]);
+                    	top.add(category2);
+                    }
+			}
     }
     
     
@@ -352,7 +374,7 @@ public class App {
               Year= id3v1Tag.getYear();
               Length= ""+mp3file.getLengthInSeconds();    		    
     	}
-    		 Query.checkSong(fileName,Title,Artist,Album,Genere,Year,Length,Playlist);
+    		 Query.insertSong(fileName,Title,Artist,Album,Genere,Year,Length,Playlist);
     		 String rowEntry = "";
     		 int check=0;
     		   for (int i = 0; i < tableModel.getRowCount(); i++) {
@@ -690,7 +712,28 @@ public class App {
         public void actionPerformed(ActionEvent e)
         {
         	
-        	Playlist playlist = new Playlist();
+        	//Playlist playlist = new Playlist();
+        	String[] stk;
+            String Playlist = JOptionPane.showInputDialog(main, "What is the name of the new Playlist?");//Note: input can be null.
+            try {
+				Query.insertSong("TEST","TEST","TEST","TEST","TEST","1900","1",Playlist);
+				String[] stk1 =Query.playlistDisplay();
+				
+                Enumeration children = root.children();
+                while(children.hasMoreElements()){
+                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) children.nextElement();
+                    if(node.toString().equals("Playlist")){
+                    		
+                        DefaultMutableTreeNode newPlay = new DefaultMutableTreeNode(Playlist);
+                        node.add(newPlay);
+                        break;
+                    }
+                }
+				
+			} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
          }
     }
     
@@ -768,6 +811,7 @@ public class App {
     	public RowPopup(JTable table) {
     		JMenuItem add = new JMenuItem("Add");
     		JMenuItem delete = new JMenuItem("Delete");
+    		JMenuItem newWindow = new JMenuItem("Open in New Window");
     		add.addActionListener(new ActionListener() {
 
 				@Override
@@ -856,6 +900,7 @@ public class App {
     			
     		});
     		add(add);
+    		add(newWindow);
     		add(delete);
     	}
     }
