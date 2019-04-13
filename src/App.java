@@ -57,11 +57,14 @@ import javax.swing.JTextArea;
 import javax.swing.JTree;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.event.TreeSelectionEvent;
+import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
+import javax.swing.tree.TreePath;
 import javax.swing.tree.TreeSelectionModel;
 
 import com.mpatric.mp3agic.ID3v1;
@@ -103,6 +106,7 @@ public class App {
     JButton Delete;
     JButton Search;
     JPanel btnPnl;
+    JTree treeForLeft ;
     static DefaultMutableTreeNode root ;
     static DefaultMutableTreeNode library ;
     static DefaultMutableTreeNode playlist ;
@@ -288,8 +292,11 @@ public class App {
         //Create a tree that allows one selection at a time.
         root.add(library);
         root.add(playlist);
-        createPlaylistnode(playlist);
-        JTree treeForLeft = new JTree(root);
+        if(Query.getPlaylistCount() > 0)
+        {
+        	createPlaylistnode(playlist);
+        }
+         treeForLeft = new JTree(root);
         treeForLeft.setRootVisible(false);
     	
         treeForLeft.addMouseListener(new MouseAdapter() {
@@ -812,6 +819,7 @@ public class App {
     		JMenuItem add = new JMenuItem("Add");
     		JMenuItem delete = new JMenuItem("Delete");
     		JMenuItem newWindow = new JMenuItem("Open in New Window");
+    		JMenuItem delPlaylist = new JMenuItem("Delete Playlist");
     		add.addActionListener(new ActionListener() {
 
 				@Override
@@ -899,8 +907,39 @@ public class App {
     			}
     			
     		});
+    		delPlaylist.addActionListener(new ActionListener() {
+    			
+    			@Override
+    			public void actionPerformed(ActionEvent arg0) {
+
+    				System.out.println("YOU ARE IN DETELE PLAYLIST SECTION");
+    				TreePath[] paths = treeForLeft.getSelectionPaths();
+    				String stk="";
+                    for (TreePath path : paths) {
+                        stk= ""+path.getLastPathComponent();
+                        break;
+                    }
+                   Query.deletePlaylist(stk);
+                   
+                    model = (DefaultTreeModel) treeForLeft.getModel();
+
+                   TreePath[] path = treeForLeft.getSelectionPaths();
+                   if (paths != null) {
+                       for (TreePath path1 : path) {
+                           DefaultMutableTreeNode node = (DefaultMutableTreeNode) 
+                               path1.getLastPathComponent();
+                           if (node.getParent() != null) {
+                               model.removeNodeFromParent(node);
+                           }
+                       }
+                   }
+    				
+    			}
+    			
+    		});
     		add(add);
     		add(newWindow);
+    		add(delPlaylist);
     		add(delete);
     	}
     }

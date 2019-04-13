@@ -206,6 +206,22 @@ public class DBQuery
             sqlExcept.printStackTrace();
         }
     }
+    public int getPlaylistCount()
+    {
+    	 int numberRows=0;
+	        try {
+				stmt = conn.createStatement();
+		        results = stmt.executeQuery("select count(DISTINCT Playlist) AS rowcount from MUSIC");
+	            while (results.next()){
+	            	numberRows = results.getInt(1);
+	            }
+			} catch (SQLException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+           return numberRows;
+    }
+    
     
     public void deletePlaylist(String Playlist)
     {
