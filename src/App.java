@@ -110,8 +110,8 @@ public class App {
     JButton Search;
     JPanel btnPnl;
     JSlider volume;
-    JTree treeForLeft ;
-    TreePath[] path ;
+    static JTree treeForLeft ;
+    static TreePath[] path ;
     static DefaultMutableTreeNode root ;
     static DefaultMutableTreeNode library ;
     static DefaultMutableTreeNode playlist ;
@@ -447,10 +447,22 @@ public class App {
     	}
     		 Query.insertSong(fileName,Title,Artist,Album,Genere,Year,Length,Playlist);
     		 String rowEntry = "";
-    		 int check=0;
+				path = treeForLeft.getSelectionPaths();
+				String stk="";
+					for (TreePath path : path) {
+							stk= ""+path.getLastPathComponent();
+							break;
+					}
+					System.out.println("The Actual Playlist "+Playlist);
+					System.out.println("The Actual stk "+stk);
+					String[] rown = { fileName, Title,Artist,Album,Genere,Year,Length,stk};
+					if(Playlist.equals(stk))
+					{
+						tableModel.addRow(rown);
+					}
 
-    			   String[] rown = { fileName, Title,Artist,Album,Genere,Year,Length,Playlist};
-    			   tableModel.addRow(rown);
+    				   
+
     			   
     			   /*
    		    library.removeAllChildren();
@@ -502,39 +514,12 @@ public class App {
 
             	if (i >= 0) {
 
-            		System.out.println("THE NUMBER OF ROWS TO DELETE "+i);
-
-            		 // for (int row3 = 0; row3<rows.length;row3++) {
                 			sk= table.getModel().getValueAt(rows, column).toString(); //-+",";
                 			pl= table.getModel().getValueAt(rows, 7).toString(); //",";
                 			System.out.println("THE PLAYLIST NAME TO DELTE "+pl);
-                			//System.out.println("ROWS FOR "+sk);
-                        //  }
-              		 // sk=sk.substring(0, sk.length()-1);
-              		System.out.println("ROWS FOR "+sk);
-              		  Query.deleteSongFromPlaylist(sk,pl);
-              	//	int numRows = table.getSelectedRows().length;
-              	//	for(int t=0; t<numRows ; t++ ) {
-              		  	tableModel.removeRow(table.getSelectedRow());
-              		  	
-             		    //model.remove(new DefaultMutableTreeNode(table.getSelectedRow()));
-              		 // System.out.println("ABOUT TO COUNT CHILD FOR ROOT BEFORE"+ root.getChildCount());
-             		    root.removeAllChildren();
-             		 // System.out.println("ABOUT TO COUNT CHILD FOR ROOT AFTER"+ root.getChildCount());
-             		 //   System.out.println("ABOUT TO PRINT TABLE ROW COUNT BEFORE DELETE "+table.getRowCount());
-             		    
-              		   for (int t = 0; t < table.getRowCount(); t++) {
-              			  root.add(new DefaultMutableTreeNode(table.getModel().getValueAt(t, 1).toString()));
-          		    }
-              		// System.out.println("ABOUT TO COUNT CHILD FOR ROOT AFTER ADDING "+ root.getChildCount());
-
-              		 model.reload(root);
-             		   
-
-              		    
-              		    
-              	//	}
-
+                			Query.deleteSongFromPlaylist(sk,pl);
+              		  		tableModel.removeRow(table.getSelectedRow());
+              		  		model.reload(root);
             	}
             	
             
@@ -733,8 +718,28 @@ public class App {
             	    DefaultTableModel contactTableModel = (DefaultTableModel) table.getModel();
             	   
             	   System.out.println(file.getPath());
+   				//System.out.println("YOU ARE IN DETELE PLAYLIST SECTION");
+   				path = treeForLeft.getSelectionPaths();
+   				String stk="";
+                   for (TreePath path : path) {
+                       stk= ""+path.getLastPathComponent();
+                       break;
+                   }
+            	   
+            	   
+            	   
             	   try {
-					addSong(file.getPath(),"Library");
+            		   if(stk=="" || stk ==" " || stk.equals("Library"))
+            		   {
+            			   addSong(file.getPath(),"Library");
+            		   }
+            		   else
+            		   {
+            			   addSong(file.getPath(),"Library");
+            			   addSong(file.getPath(),stk);
+            		   }
+					
+					
 				} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -774,20 +779,15 @@ public class App {
         	String[] stk;
             String Playlist = JOptionPane.showInputDialog(main, "What is the name of the new Playlist?");//Note: input can be null.
             try {
-				Query.insertSong("TEST","TEST","TEST","TEST","TEST","1900","1",Playlist);
-				String[] stk1 =Query.playlistDisplay();
-				
-                Enumeration children = root.children();
-                while(children.hasMoreElements()){
-                    DefaultMutableTreeNode node = (DefaultMutableTreeNode) children.nextElement();
-                    if(node.toString().equals("Playlist")){
-                    		
-                        DefaultMutableTreeNode newPlay = new DefaultMutableTreeNode(Playlist);
-                        node.add(newPlay);
-                        break;
-                    }
-                }
-				
+            	if(Playlist!="" && Playlist !=" " && Playlist.length()>0)
+            	{
+					Query.insertSong("TEST","TEST","TEST","TEST","TEST","1900","1",Playlist);
+					String[] stk1 =Query.playlistDisplay();
+	                        DefaultMutableTreeNode newPlay = new DefaultMutableTreeNode(Playlist);
+	                        playlist.add(newPlay);
+	                        treeForLeft.updateUI();
+            	}
+
 			} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
 				// TODO Auto-generated catch block
 				e1.printStackTrace();
@@ -824,12 +824,29 @@ public class App {
                         	
                         // Loop them through
                         for (File file1 : file) {
+                        	
+                        	
+                        	
+                        	
+               				path = treeForLeft.getSelectionPaths();
+               				String stk="";
+                               for (TreePath path : path) {
+                                   stk= ""+path.getLastPathComponent();
+                                   break;
+                               }
+                        	   
+                        	   
+           
+                               if(stk=="" || stk ==" " || stk.equals("Library"))
+                        		   {
+                        			   addSong(file1.getPath(),"Library");
+                        		   }
+                        		   else
+                        		   {
+                        			   addSong(file1.getPath(),"Library");
+                        			   addSong(file1.getPath(),stk);
+                        		   }
 
-                            // Print out the file path
-                        	addSong(file1.getPath(),"Library");
-                        	Stk+=file1.getPath()+"\n";
-                        	//textArea.setText(Stk);
-                            System.out.println("File path is '" + file1.getPath() + "'.");
 
                         }
 
@@ -871,6 +888,8 @@ public class App {
     		JMenuItem delete = new JMenuItem("Delete");
     		JMenuItem newWindow = new JMenuItem("Open in New Window");
     		JMenuItem delPlaylist = new JMenuItem("Delete Playlist");
+    		
+    		JMenuItem addPlaylist = new JMenuItem("Add to playlist");
     		add.addActionListener(new ActionListener() {
 
 				@Override
@@ -891,12 +910,7 @@ public class App {
 							e1.printStackTrace();
 						}
 		               }
-		               //model.remove(new DefaultMutableTreeNode(table.getSelectedRow()));
-               		 // System.out.println("ABOUT TO COUNT CHILD FOR ROOT BEFORE"+ root.getChildCount());
-              		    library.removeAllChildren();
-              		 // System.out.println("ABOUT TO COUNT CHILD FOR ROOT AFTER"+ root.getChildCount());
-              		 //   System.out.println("ABOUT TO PRINT TABLE ROW COUNT BEFORE DELETE "+table.getRowCount());
-              		    
+              		    library.removeAllChildren();      		    
                		   for (int t = 0; t < table.getRowCount(); t++) {
                			  library.add(new DefaultMutableTreeNode(table.getModel().getValueAt(t, 1).toString()));
            		    }
@@ -921,32 +935,13 @@ public class App {
                 	if (i >= 0) {
 
                 		System.out.println("THE NUMBER OF ROWS TO DELTE "+i);
-
-                	//	  for (int row3 = 0; row3<rows.length;row3++) {
                     			sk= table.getModel().getValueAt(rows, column).toString();//+",";
                     			pl= table.getModel().getValueAt(rows, 7).toString();//+",";
-                    			//System.out.println("ROWS FOR "+sk);
-                      //        }
-                  		 // sk=sk.substring(0, sk.length()-1);
-                  		//System.out.println("ROWS FOR "+sk);
-                  		  Query.deleteSongFromPlaylist(sk, pl);
-                  		//int numRows = table.getSelectedRows().length;
-                  		//for(int t=0; t<numRows ; t++ ) {
+                    			Query.deleteSongFromPlaylist(sk, pl);
+  
 
                   		    tableModel.removeRow(table.getSelectedRow());
-                  		//}
-                 		    //model.remove(new DefaultMutableTreeNode(table.getSelectedRow()));
-                     		 // System.out.println("ABOUT TO COUNT CHILD FOR ROOT BEFORE"+ root.getChildCount());
-                    		    library.removeAllChildren();
-                    		 // System.out.println("ABOUT TO COUNT CHILD FOR ROOT AFTER"+ root.getChildCount());
-                    		 //   System.out.println("ABOUT TO PRINT TABLE ROW COUNT BEFORE DELETE "+table.getRowCount());
-                    		    
-                     		   for (int t = 0; t < table.getRowCount(); t++) {
-                     			  library.add(new DefaultMutableTreeNode(table.getModel().getValueAt(t, 1).toString()));
-                 		    }
-                     		// System.out.println("ABOUT TO COUNT CHILD FOR ROOT AFTER ADDING "+ root.getChildCount());
-
-                     		 model.reload(library);
+ 
 
                 	} else {
                 	System.out
@@ -992,9 +987,47 @@ public class App {
     			}
     			
     		});
+    		addPlaylist.addActionListener(new ActionListener() {
+    			
+    			@Override
+    			public void actionPerformed(ActionEvent arg0) {
+    				
+    				//System.out.println("YOU ARE IN DETELE PLAYLIST SECTION");
+    				path = treeForLeft.getSelectionPaths();
+    				String stk="";
+                    for (TreePath path : path) {
+                        stk= ""+path.getLastPathComponent();
+                        break;
+                    }
+                    int reply = JOptionPane.showConfirmDialog(null, "Would you like to delete the Playlist "+stk, "Delete Option", JOptionPane.YES_NO_OPTION);
+                  if(reply == JOptionPane.YES_OPTION)
+                 {
+                   Query.deletePlaylist(stk);
+                   model = (DefaultTreeModel) treeForLeft.getModel();
+
+                   path = treeForLeft.getSelectionPaths();
+                   if (path != null) {
+                       for (TreePath path1 : path) {
+                           DefaultMutableTreeNode node = (DefaultMutableTreeNode) 
+                               path1.getLastPathComponent();
+                           if (node.getParent() != null) {
+                               model.removeNodeFromParent(node);
+                           }
+                       }
+                   }
+                   
+    			}
+    				
+    			}
+    			
+    		});
+    		
+    		
+    		
     		add(add);
     		add(newWindow);
     		add(delPlaylist);
+    		add(addPlaylist);
     		add(delete);
     	}
     }

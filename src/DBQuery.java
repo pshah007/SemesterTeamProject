@@ -32,16 +32,16 @@ public class DBQuery
     	
     	DBQuery query = new DBQuery();
     	query.createConnection();
-    	//query.dropTable();
-    	//query.createTable();
-    	//query.insertSong("TEST","TEST","TEST","TEST","TEST","1900","1","Library");
+    	query.dropTable();
+    	query.createTable();
+    	query.insertSong("TEST","TEST","TEST","TEST","TEST","1900","1","Library");
     	//int temp = query.getPlaylistCount();
-    	String[][] stk2=playlistDisplaySongs("Library");
+    	//String[][] stk2=playlistDisplaySongs("Library");
     	//System.out.println(temp);
     	
     	//for(int x = 0 ; x < stk2.length ; x++)
     	//{
-    		System.out.println(stk2[0][3]);
+    		//System.out.println(stk2[0][3]);
     	//}
     	//query.createTable();
     	//query.selectSong();
