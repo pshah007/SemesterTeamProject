@@ -34,13 +34,15 @@ public class DBQuery
     	query.createConnection();
     	//query.dropTable();
     	//query.createTable();
-    	query.insertSong("TEST","TEST","TEST","TEST","TEST","1900","1","TESTPLAY");
-    	query.insertSong("TEST","TEST","TEST","TEST","TEST","1900","1","TESTPLAY2");
-    	String[] stk=query.playlistDisplay();
-    	for(int x = 0 ; x < stk.length ; x++)
-    	{
-    		System.out.println(stk[x]);
-    	}
+    	//query.insertSong("TEST","TEST","TEST","TEST","TEST","1900","1","Library");
+    	//int temp = query.getPlaylistCount();
+    	String[][] stk2=playlistDisplaySongs("Library");
+    	//System.out.println(temp);
+    	
+    	//for(int x = 0 ; x < stk2.length ; x++)
+    	//{
+    		System.out.println(stk2[0][3]);
+    	//}
     	//query.createTable();
     	//query.selectSong();
     }
@@ -211,7 +213,7 @@ public class DBQuery
     	 int numberRows=0;
 	        try {
 				stmt = conn.createStatement();
-		        results = stmt.executeQuery("select count(DISTINCT Playlist) AS rowcount from MUSIC");
+		        results = stmt.executeQuery("select count(DISTINCT Playlist) AS rowcount from MUSIC where Playlist <> 'Library'");
 	            while (results.next()){
 	            	numberRows = results.getInt(1);
 	            }
@@ -439,12 +441,54 @@ public class DBQuery
     	return stk;
     }
     
+    public static String[][] playlistDisplaySongs(String play) 
+    {
+    	String[][] stk = null;
+    	try {
+	        stmt = conn.createStatement();
+	        results = stmt.executeQuery("select * from MUSIC");
+	        ResultSetMetaData rsmd = results.getMetaData();
+	        int numberCols = rsmd.getColumnCount();
+	        
+	        results = stmt.executeQuery("select count(*) AS rowcount from MUSIC where Playlist = '"+play+"'");
+
+	        int numberRows=0;
+            while (results.next()){
+            	numberRows = results.getInt(1);
+            }
+            System.out.println("IAM HERE ");
+	        stk = new String[numberRows][numberCols-2];
+	        
+	        results = stmt.executeQuery("select * from MUSIC where Playlist = '"+play+"'");
+	        int t=0;
+	        while(results.next())
+	        {
+	        	
+	        	stk[t][0] = results.getString(2);
+	        	stk[t][1] = results.getString(3);		
+	        	stk[t][2] = results.getString(4);
+	    	    stk[t][3] = results.getString(5);
+	    	    stk[t][4] = results.getString(6);
+	    	    stk[t][5] = results.getString(7);
+	    	    stk[t][6] = results.getString(8);
+	    	    stk[t][7] = results.getString(10);
+	    	    t++;
+	        }
+    	}
+		
+        catch (SQLException sqlExcept)
+        {
+            sqlExcept.printStackTrace();
+        }
+    	return stk;
+    }
+    
     public String[] playlistDisplay() 
     {
     	String[] stk = null;
     	try {
 	        stmt = conn.createStatement();
-	        results = stmt.executeQuery("select count(DISTINCT Playlist) AS rowcount from MUSIC");
+	        results = stmt.executeQuery("select count(DISTINCT Playlist) AS rowcount from MUSIC Where Playlist <> 'Library'");
 	        int numberRows=0;
             while (results.next()){
             	numberRows = results.getInt(1);
@@ -452,7 +496,7 @@ public class DBQuery
             if(numberRows>0)
 	        
             {
-		        results = stmt.executeQuery("select DISTINCT Playlist from MUSIC");
+		        results = stmt.executeQuery("select DISTINCT Playlist from MUSIC Where Playlist <> 'Library'");
 		        ResultSetMetaData rsmd = results.getMetaData();
 	
 		        stk = new String[numberRows];

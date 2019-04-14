@@ -107,6 +107,7 @@ public class App {
     JButton Search;
     JPanel btnPnl;
     JTree treeForLeft ;
+    TreePath[] path ;
     static DefaultMutableTreeNode root ;
     static DefaultMutableTreeNode library ;
     static DefaultMutableTreeNode playlist ;
@@ -195,11 +196,7 @@ public class App {
         control = (BasicController) player;
       
           //data holds the table data and maps as a 2d array into the table
-          data = Query.dataDisplay();
-          
-
-          
-          
+          data = Query.playlistDisplaySongs("Library");
           tableModel= new DefaultTableModel(data, columns);
           table = new JTable();
           table.setModel(tableModel);
@@ -304,6 +301,10 @@ public class App {
 				if(SwingUtilities.isRightMouseButton(me)) {
 					pop.show(me.getComponent(), me.getX(), me.getY() );
 				}
+				else
+				{
+					doMouseClicked(me);
+				}
 			}
 		});
         
@@ -328,11 +329,53 @@ public class App {
         mainPanel.add(treePane,BorderLayout.WEST);
         main.add(mainPanel);
        
-       
-       
-       
     }
-    
+    void tableRemoveAllRows()
+    {
+    	
+    	int rowCount = tableModel.getRowCount();
+    	//Remove rows one by one from the end of the table
+    	for (int i = rowCount - 1; i >= 0; i--) {
+    		tableModel.removeRow(i);
+    	}
+    }
+    void doMouseClicked(MouseEvent me) {
+    	
+        String fileName;
+        String Title ;
+        String Artist=" ";
+        String Album =" ";
+        String Genere = " ";
+        String Year="";
+        String Length = "";
+        
+		path = treeForLeft.getSelectionPaths();
+		String stk="";
+        for (TreePath path : path) {
+            stk= ""+path.getLastPathComponent();
+            break;
+        }
+		tableRemoveAllRows();
+
+	   data = Query.playlistDisplaySongs(stk);
+	    for(int i=0; i<data.length; i++) {
+	        fileName=data[i][0];
+	        Title=data[i][1];
+	        Artist=data[i][2];
+	        Album =data[i][3];
+	        Genere = data[i][4];
+	        Year=data[i][5];
+	        Length =data[i][6];
+	        String[] rown = {fileName, Title,Artist,Album,Genere,Year,Length,stk};
+	        tableModel.addRow(rown);
+	    }
+	   
+   
+
+
+        
+        System.out.println("STK PLAYLIST VALUE IS "+stk); 
+      }
     private static void createNodes(DefaultMutableTreeNode top) {
         DefaultMutableTreeNode category2 = null;
         int nRow = table.getRowCount();
@@ -345,7 +388,7 @@ public class App {
      public static void createPlaylistnode(DefaultMutableTreeNode top) {
 			String[] stk1 =Query.playlistDisplay();
 			//System.out.println(stk1.length);
-			if(stk1.length>0)
+			if(stk1.length>0 && stk1!=null)
 			{
                     for (int k = 0 ; k < stk1.length ; k++)
                     {
@@ -384,31 +427,18 @@ public class App {
     		 Query.insertSong(fileName,Title,Artist,Album,Genere,Year,Length,Playlist);
     		 String rowEntry = "";
     		 int check=0;
-    		   for (int i = 0; i < tableModel.getRowCount(); i++) {
-    		 
-    		            rowEntry = table.getValueAt(i, 0).toString();
-    		        if (rowEntry.equalsIgnoreCase(fileName)) {
-    		        	check=1;
-    		            break;
-    		        }
-    		    }
 
-    	        
-
-    		   if(check==0)
-    		   {
     			   String[] rown = { fileName, Title,Artist,Album,Genere,Year,Length,Playlist};
     			   tableModel.addRow(rown);
     			   
-    		   }
-    		   
-
+    			   /*
    		    library.removeAllChildren();
    		    System.out.println("ABOUT TO PRINT TABLE ROW COUNT BEFORE DEFUALTMUTABLETTREENODE "+table.getRowCount());
     		   for (int i = 0; i < table.getRowCount(); i++) {
     			  library.add(new DefaultMutableTreeNode(table.getModel().getValueAt(i, 1).toString()));
 		    }
-   	        model.reload(library);
+    		   */
+   	        //model.reload(library);
     }
 
 	public void go(){
@@ -683,7 +713,7 @@ public class App {
             	   
             	   System.out.println(file.getPath());
             	   try {
-					addSong(file.getPath(),"Main");
+					addSong(file.getPath(),"Library");
 				} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -775,7 +805,7 @@ public class App {
                         for (File file1 : file) {
 
                             // Print out the file path
-                        	addSong(file1.getPath(),"Main");
+                        	addSong(file1.getPath(),"Library");
                         	Stk+=file1.getPath()+"\n";
                         	//textArea.setText(Stk);
                             System.out.println("File path is '" + file1.getPath() + "'.");
@@ -834,7 +864,7 @@ public class App {
 		            	   
 		            	   System.out.println(file.getPath());
 		            	   try {
-							addSong(file.getPath(),"Main");
+							addSong(file.getPath(),"Library");
 						} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
@@ -911,20 +941,22 @@ public class App {
     			
     			@Override
     			public void actionPerformed(ActionEvent arg0) {
-
-    				System.out.println("YOU ARE IN DETELE PLAYLIST SECTION");
-    				TreePath[] paths = treeForLeft.getSelectionPaths();
+    				
+    				//System.out.println("YOU ARE IN DETELE PLAYLIST SECTION");
+    				path = treeForLeft.getSelectionPaths();
     				String stk="";
-                    for (TreePath path : paths) {
+                    for (TreePath path : path) {
                         stk= ""+path.getLastPathComponent();
                         break;
                     }
+                    int reply = JOptionPane.showConfirmDialog(null, "Would you like to delete the Playlist "+stk, "Delete Option", JOptionPane.YES_NO_OPTION);
+                  if(reply == JOptionPane.YES_OPTION)
+                 {
                    Query.deletePlaylist(stk);
-                   
-                    model = (DefaultTreeModel) treeForLeft.getModel();
+                   model = (DefaultTreeModel) treeForLeft.getModel();
 
-                   TreePath[] path = treeForLeft.getSelectionPaths();
-                   if (paths != null) {
+                   path = treeForLeft.getSelectionPaths();
+                   if (path != null) {
                        for (TreePath path1 : path) {
                            DefaultMutableTreeNode node = (DefaultMutableTreeNode) 
                                path1.getLastPathComponent();
@@ -933,6 +965,8 @@ public class App {
                            }
                        }
                    }
+                   
+    			}
     				
     			}
     			
