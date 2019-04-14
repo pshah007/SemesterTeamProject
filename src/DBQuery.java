@@ -450,7 +450,7 @@ public class DBQuery
 	        ResultSetMetaData rsmd = results.getMetaData();
 	        int numberCols = rsmd.getColumnCount();
 	        
-	        results = stmt.executeQuery("select count(*) AS rowcount from MUSIC where Playlist = '"+play+"'");
+	        results = stmt.executeQuery("select count(*) AS rowcount from MUSIC where Playlist = '"+play+"'"+" AND File <>'TEST' AND Title <>'TEST'");
 
 	        int numberRows=0;
             while (results.next()){
@@ -459,7 +459,7 @@ public class DBQuery
             System.out.println("IAM HERE ");
 	        stk = new String[numberRows][numberCols-2];
 	        
-	        results = stmt.executeQuery("select * from MUSIC where Playlist = '"+play+"'");
+	        results = stmt.executeQuery("select * from MUSIC where Playlist = '"+play+"'"+" AND File <>'TEST' AND Title <>'TEST' ");
 	        int t=0;
 	        while(results.next())
 	        {
