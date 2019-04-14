@@ -52,11 +52,14 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JSlider;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTree;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableModel;
@@ -106,13 +109,14 @@ public class App {
     JButton Delete;
     JButton Search;
     JPanel btnPnl;
+    JSlider volume;
     JTree treeForLeft ;
     TreePath[] path ;
     static DefaultMutableTreeNode root ;
     static DefaultMutableTreeNode library ;
     static DefaultMutableTreeNode playlist ;
     static BasicPlayer player;
-    BasicController control ;
+    static BasicController control ;
     static String[][] data;
     static String[] columns = new String[8];
     static DefaultTableModel tableModel;
@@ -250,7 +254,15 @@ public class App {
         //Repeat.addActionListener(buttonListener);
         Shuffle.addActionListener(buttonListener);
         scrollPane = new JScrollPane(table);
+        volume = new JSlider(0,100,25);
         
+        volume.addChangeListener( new ChangeListener() {
+        	public void stateChanged(ChangeEvent evt)
+        	{
+        		volume((double)volume.getValue()/100);
+        	}
+        	
+        });
         
         bottombtnPnl.add(Play, BorderLayout.CENTER);
         bottombtnPnl.add(Stop, BorderLayout.LINE_START);
@@ -260,7 +272,7 @@ public class App {
         bottombtnPn2.add(Delete, BorderLayout.CENTER);
         
         bottombtnPn3.add(Shuffle, BorderLayout.LINE_START);
-        bottombtnPn3.add(Search, BorderLayout.CENTER);
+        bottombtnPn3.add(volume, BorderLayout.CENTER);
         bottombtnPn3.add(Next, BorderLayout.LINE_END);
  
         
@@ -330,7 +342,7 @@ public class App {
         main.add(mainPanel);
        
     }
-    void tableRemoveAllRows()
+    public void tableRemoveAllRows()
     {
     	
     	int rowCount = tableModel.getRowCount();
@@ -339,7 +351,7 @@ public class App {
     		tableModel.removeRow(i);
     	}
     }
-    void doMouseClicked(MouseEvent me) {
+    public void doMouseClicked(MouseEvent me) {
     	
         String fileName;
         String Title ;
@@ -376,7 +388,7 @@ public class App {
         
         System.out.println("STK PLAYLIST VALUE IS "+stk); 
       }
-    private static void createNodes(DefaultMutableTreeNode top) {
+    public static void createNodes(DefaultMutableTreeNode top) {
         DefaultMutableTreeNode category2 = null;
         int nRow = table.getRowCount();
         for (int i = 0 ; i < nRow ; i++)
@@ -398,6 +410,15 @@ public class App {
                     }
 			}
     }
+     public static void volume(double voume)
+     {
+    	 try {
+			control.setGain(voume);
+		} catch (BasicPlayerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+     }
     
     
     public static void addSong(String fileName,String Playlist) throws UnsupportedTagException, InvalidDataException, IOException
