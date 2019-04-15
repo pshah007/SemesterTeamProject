@@ -42,9 +42,11 @@ import javax.sound.sampled.SourceDataLine;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JMenu;
 import javax.swing.JMenuBar;
 import javax.swing.JMenuItem;
@@ -56,10 +58,12 @@ import javax.swing.JSlider;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTree;
+import javax.swing.ListSelectionModel;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.ListSelectionEvent;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableModel;
@@ -934,13 +938,11 @@ public class App {
 
                 	if (i >= 0) {
 
-                		System.out.println("THE NUMBER OF ROWS TO DELTE "+i);
+                				System.out.println("THE NUMBER OF ROWS TO DELTE "+i);
                     			sk= table.getModel().getValueAt(rows, column).toString();//+",";
                     			pl= table.getModel().getValueAt(rows, 7).toString();//+",";
                     			Query.deleteSongFromPlaylist(sk, pl);
-  
-
-                  		    tableModel.removeRow(table.getSelectedRow());
+                    			tableModel.removeRow(table.getSelectedRow());
  
 
                 	} else {
@@ -989,37 +991,26 @@ public class App {
     		});
     		addPlaylist.addActionListener(new ActionListener() {
     			
-    			@Override
+   
     			public void actionPerformed(ActionEvent arg0) {
     				
-    				//System.out.println("YOU ARE IN DETELE PLAYLIST SECTION");
-    				path = treeForLeft.getSelectionPaths();
-    				String stk="";
-                    for (TreePath path : path) {
-                        stk= ""+path.getLastPathComponent();
-                        break;
-                    }
-                    int reply = JOptionPane.showConfirmDialog(null, "Would you like to delete the Playlist "+stk, "Delete Option", JOptionPane.YES_NO_OPTION);
-                  if(reply == JOptionPane.YES_OPTION)
-                 {
-                   Query.deletePlaylist(stk);
-                   model = (DefaultTreeModel) treeForLeft.getModel();
-
-                   path = treeForLeft.getSelectionPaths();
-                   if (path != null) {
-                       for (TreePath path1 : path) {
-                           DefaultMutableTreeNode node = (DefaultMutableTreeNode) 
-                               path1.getLastPathComponent();
-                           if (node.getParent() != null) {
-                               model.removeNodeFromParent(node);
-                           }
-                       }
-                   }
-                   
-    			}
+    	
+    				String[] data2 = Query.playlistDisplay();
+    				  String stk =  (String) JOptionPane.showInputDialog(null,  
+    			                "Please select the Playlist", "Playlist Selection",  
+    			                JOptionPane.PLAIN_MESSAGE, null, data2, "Numbers");
+    				  try {
+						addSong(table.getModel().getValueAt(table.getSelectedRow(), 0).toString(),stk);
+					} catch (UnsupportedTagException | InvalidDataException | IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+    				  
+					
     				
     			}
     			
+    		
     		});
     		
     		
