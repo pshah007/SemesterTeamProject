@@ -334,7 +334,7 @@ public class App {
         
         right.add(textArea);
         main.setJMenuBar(mb);
-        textArea.setText("Drop Songs Here To Add to Library");
+        textArea.setText("Drop Songs Here To Add To : Library");
         right.add(scrollPane, BorderLayout.NORTH);
         right.add(textArea, BorderLayout.CENTER);
         right.add(nowPlaying, BorderLayout.EAST);
@@ -391,6 +391,7 @@ public class App {
 
         
         System.out.println("STK PLAYLIST VALUE IS "+stk); 
+        textArea.setText("Drop Songs Here To Add To : " + stk);
       }
     public static void createNodes(DefaultMutableTreeNode top) {
         DefaultMutableTreeNode category2 = null;
@@ -779,7 +780,7 @@ public class App {
         public void actionPerformed(ActionEvent e)
         {
         	
-        	//Playlist playlist = new Playlist();
+        	
         	String[] stk;
             String Playlist = JOptionPane.showInputDialog(main, "What is the name of the new Playlist?");//Note: input can be null.
             try {
@@ -843,10 +844,12 @@ public class App {
            
                                if(stk=="" || stk ==" " || stk.equals("Library"))
                         		   {
+                            	 
                         			   addSong(file1.getPath(),"Library");
                         		   }
                         		   else
                         		   {
+                        			
                         			   addSong(file1.getPath(),"Library");
                         			   addSong(file1.getPath(),stk);
                         		   }
@@ -1011,6 +1014,25 @@ public class App {
     			}
     			
     		
+    		});
+    		
+    		newWindow.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent arg0) {
+					// TODO Auto-generated method stub
+					path = treeForLeft.getSelectionPaths();
+    				String stk="";
+                    for (TreePath path : path) {
+                        stk= ""+path.getLastPathComponent();
+                        break;
+                    }
+                    System.out.println("this is the selected one : " +stk);
+					Playlist playlistwindow = new Playlist(stk);
+					
+				}
+    			
+    			
     		});
     		
     		

@@ -48,12 +48,16 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
+import javax.swing.JSlider;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
+import javax.swing.tree.TreePath;
 
 import com.mpatric.mp3agic.ID3v1;
 import com.mpatric.mp3agic.InvalidDataException;
@@ -69,14 +73,14 @@ import javazoom.jlgui.basicplayer.BasicPlayerException;
 public class Playlist {
     
     
-    static JFrame  main = new JFrame("AudioPlayer");
+    static JFrame playlistWindow;
     static JTable table;
     JPanel bottombtnPnl;
     JPanel bottombtnPn2;
     JPanel bottombtnPn3;
     JPanel bottombtnPnx;
     ButtonListener buttonListener;
-    
+    JSlider volume;
     
     JScrollPane scrollPane; 
     int CurrentSelectedRow;
@@ -91,23 +95,26 @@ public class Playlist {
     JButton Search;
     JPanel btnPnl;
     static BasicPlayer player;
-    BasicController control ;
+    //static BasicController control;
+    static BasicController control ;
     static String[][] data;
-    static String[] columns = new String[7];
+    static String[] columns = new String[8];
     static DefaultTableModel tableModel;
     static DBQuery Query;
     final JTextArea textArea;
     static boolean isPaused = false;
     JLabel nowPlaying = new JLabel("");
-
+    static String playlist;
 
 	
     
     /**
      * 
      */
-    public Playlist(){
+    public Playlist(String playlistName){
     	
+    	playlist = playlistName;
+    	playlistWindow = new JFrame(playlist);
     	/*
     	 * ADDING MENU BAR NAME FILE WHICH WILL CONTAIN NEW,OPEN,EXIT
     	 */
@@ -130,7 +137,8 @@ public class Playlist {
     	New.addActionListener(new newJmenuButton());
     	Open.addActionListener(new openJmenuButton());
     	cplay.addActionListener(new cplayJmenuButton());
-    	main.pack();
+    	playlistWindow.pack();
+    	playlistWindow.setSize(800, 600);
     	
     	/*
     	 * CREATING NEW OBJECT FOR DB QUERY TO CONNECT DB WHICH IS CALLED WEBDB1
@@ -168,11 +176,12 @@ public class Playlist {
     	columns[4] ="GENERE";
     	columns[5] ="YEAR";
     	columns[6] ="LENGTH";
+    	columns[7] ="PLAYLIST";
     	player = new BasicPlayer();
         control = (BasicController) player;
       
           //data holds the table data and maps as a 2d array into the table
-          data = Query.dataDisplay();
+          data = Query.playlistDisplaySongs(playlistName);
           
           
           
@@ -228,6 +237,15 @@ public class Playlist {
         //Repeat.addActionListener(buttonListener);
         Shuffle.addActionListener(buttonListener);
         scrollPane = new JScrollPane(table);
+        volume = new JSlider(0,100,25);
+        
+        volume.addChangeListener( new ChangeListener() {
+        	public void stateChanged(ChangeEvent evt)
+        	{
+        		volume((double)volume.getValue()/100);
+        	}
+        	
+        });
         
         bottombtnPnl.add(Play, BorderLayout.CENTER);
         bottombtnPnl.add(Stop, BorderLayout.LINE_START);
@@ -237,7 +255,8 @@ public class Playlist {
         bottombtnPn2.add(Delete, BorderLayout.CENTER);
         
         bottombtnPn3.add(Shuffle, BorderLayout.LINE_START);
-        bottombtnPn3.add(Search, BorderLayout.CENTER);
+        bottombtnPn3.add(volume, BorderLayout.CENTER);
+        //bottombtnPn3.add(Search, BorderLayout.CENTER);
         bottombtnPn3.add(Next, BorderLayout.LINE_END);
  
         
@@ -255,18 +274,32 @@ public class Playlist {
 			}
 		});
         
-        main.add(textArea);
-        main.setJMenuBar(mb);
-        textArea.setText("Drop Songs Here To Add to Library");
-        main.add(scrollPane, BorderLayout.NORTH);
-        main.add(textArea, BorderLayout.CENTER);
-        main.add(btnPnl, BorderLayout.SOUTH);
-        main.add(nowPlaying, BorderLayout.EAST);
-        main.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        main.setExtendedState(JFrame.MAXIMIZED_BOTH); 
-       // main.setUndecorated(true);
-        main.setVisible(true);
+        playlistWindow.add(textArea);
+        playlistWindow.setJMenuBar(mb);
+        textArea.setText("Drop Songs Here To Add to Playlist : " + playlist);
+        playlistWindow.add(scrollPane, BorderLayout.NORTH);
+        playlistWindow.add(textArea, BorderLayout.CENTER);
+        playlistWindow.add(btnPnl, BorderLayout.SOUTH);
+        playlistWindow.add(nowPlaying, BorderLayout.EAST);
+        playlistWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        playlistWindow.setExtendedState(JFrame.MAXIMIZED_BOTH); 
+       // playlistWindow.setUndecorated(true);
+        playlistWindow.setVisible(true);
        
+        
+        playlistWindow.addWindowListener(new java.awt.event.WindowAdapter() {
+            @Override
+            public void windowClosed(java.awt.event.WindowEvent windowEvent) {
+            	try {
+					player.stop();
+				} catch (BasicPlayerException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+            }
+        });
+        
+      
     }
     
     
@@ -280,7 +313,7 @@ public class Playlist {
         String Genere = " ";
         String Year="";
         String Length = "";
-        String Playlist = "";
+       
     	if (mp3file.hasId3v1Tag()) {
     		  ID3v1 id3v1Tag = mp3file.getId3v1Tag();
 			  System.out.println("Title: " + id3v1Tag.getTitle());
@@ -295,30 +328,47 @@ public class Playlist {
               Year= id3v1Tag.getYear();
               Length= ""+mp3file.getLengthInSeconds();    		    
     	}
-    		 Query.checkSong(fileName,Title,Artist,Album,Genere,Year,Length,Playlist);
+    		 Query.insertSong(fileName,Title,Artist,Album,Genere,Year,Length,playlist);
     		 String rowEntry = "";
-    		 int check=0;
-    		   for (int i = 0; i < tableModel.getRowCount(); i++) {
-    		 
-    		            rowEntry = table.getValueAt(i, 0).toString();
-    		        if (rowEntry.equalsIgnoreCase(fileName)) {
-    		        	check=1;
-    		            break;
-    		        }
-    		    }
-    		   if(check==0)
-    		   {
-    			   String[] rown = { fileName, Title,Artist,Album,Genere,Year,Length,Playlist };
-    			   tableModel.addRow(rown);
-    		   }
+			
+					System.out.println("The Actual Playlist "+playlist);
+					//System.out.println("The Actual stk "+stk);
+					String[] rown = { fileName, Title,Artist,Album,Genere,Year,Length,playlist};
+					//if(Playlist.equals(stk))
+					//{
+						tableModel.addRow(rown);
+					//}
+
+    				   
+
+    			   
+    			   /*
+   		    library.removeAllChildren();
+   		    System.out.println("ABOUT TO PRINT TABLE ROW COUNT BEFORE DEFUALTMUTABLETTREENODE "+table.getRowCount());
+    		   for (int i = 0; i < table.getRowCount(); i++) {
+    			  library.add(new DefaultMutableTreeNode(table.getModel().getValueAt(i, 1).toString()));
+		    }
+    		   */
+   	        //model.reload(library);
+    }
+    
+    public static void volume(double voume)
+    {
+   	 try {
+			control.setGain(voume);
+		} catch (BasicPlayerException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
-	public void go(){
-        main.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        main.setExtendedState(JFrame.MAXIMIZED_BOTH); 
-       // main.setUndecorated(true);
-        main.setVisible(true);
-    }
+
+	/*public void go(){
+		playlistWindow.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		playlistWindow.setExtendedState(JFrame.MAXIMIZED_BOTH); 
+       // playlistWindow.setUndecorated(true);
+		playlistWindow.setVisible(true);
+    }*/
 
 	
 
@@ -376,7 +426,7 @@ public class Playlist {
             {
             	isPaused = false;
             	String[] stk;
-                String name = JOptionPane.showInputDialog(main, "What is the name of the song?");//Note: input can be null.
+                String name = JOptionPane.showInputDialog(playlistWindow, "What is the name of the song?");//Note: input can be null.
                // String Title = table.getModel().getValueAt(row, 1).toString();
         		//String Artist = table.getModel().getValueAt(row, 2).toString();
         		nowPlaying.setText("");
@@ -555,7 +605,7 @@ public class Playlist {
         {
         	System.out.println("Yes this is the one");
         	   JFileChooser chooser = new JFileChooser();
-               if (chooser.showOpenDialog(main) == JFileChooser.APPROVE_OPTION) {
+               if (chooser.showOpenDialog(playlistWindow) == JFileChooser.APPROVE_OPTION) {
             	   File file = chooser.getSelectedFile();
             	    DefaultTableModel contactTableModel = (DefaultTableModel) table.getModel();
             	   System.out.println(file.getPath());
@@ -575,7 +625,7 @@ public class Playlist {
         {
         	
         	   JFileChooser chooser = new JFileChooser();
-               if (chooser.showOpenDialog(main) == JFileChooser.APPROVE_OPTION) {
+               if (chooser.showOpenDialog(playlistWindow) == JFileChooser.APPROVE_OPTION) {
             	   File file = chooser.getSelectedFile();
             	    DefaultTableModel contactTableModel = (DefaultTableModel) table.getModel();
             	    try {
@@ -597,7 +647,7 @@ public class Playlist {
         {
         	
         	   JFileChooser chooser = new JFileChooser();
-               if (chooser.showOpenDialog(main) == JFileChooser.APPROVE_OPTION) {
+               if (chooser.showOpenDialog(playlistWindow) == JFileChooser.APPROVE_OPTION) {
             	   File file = chooser.getSelectedFile();
             	    DefaultTableModel contactTableModel = (DefaultTableModel) table.getModel();
             	    try {
