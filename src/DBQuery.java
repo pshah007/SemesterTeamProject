@@ -27,27 +27,27 @@ public class DBQuery
     private static String dbURL ="jdbc:derby:codejava/webdb1;create=true";
    
 
-   /*
-    public static void main(String[] args) throws UnsupportedTagException, InvalidDataException, IOException {
+   
+    /*public static void main(String[] args) throws UnsupportedTagException, InvalidDataException, IOException {
     	
     	DBQuery query = new DBQuery();
     	query.createConnection();
-    	//query.dropTable();
-    	//query.createTable();
-    	//query.insertSong("TEST","TEST","TEST","TEST","TEST","1900","1","Library");
+    	query.dropTable();
+    	query.createTable();
+    	query.insertSong("TEST","TEST","TEST","TEST","TEST","1900","1","Library");
     	//int temp = query.getPlaylistCount();
     	//String[][] stk2=playlistDisplaySongs("Library");
     	//System.out.println(temp);
-    	int t=query.checkSong("Give Me Novacaine","TEST1");
-    	System.out.println(t);
+    	//int t=query.checkSong("Give Me Novacaine","TEST1");
+    	//System.out.println(t);
     	//for(int x = 0 ; x < stk2.length ; x++)
     	//{
     		//System.out.println(stk2[0][3]);
     	//}
     	//query.createTable();
     	//query.selectSong();
-    }
-   */
+    }*/
+   
     
     
     public String[] searchSongByTitle(String Title) throws UnsupportedTagException, InvalidDataException, IOException

@@ -127,7 +127,7 @@ public class App {
     static DefaultTableModel tableModel;
     static DefaultTreeModel model;
     static DBQuery Query;
-    final JTextArea textArea;
+    final static JTextArea textArea = new JTextArea();
     static boolean isPaused = false;
     JLabel nowPlaying = new JLabel("");
 
@@ -191,7 +191,7 @@ public class App {
     	/*
     	 * CREATING TEXT AREA FOR DRAG AND DROP FILE
     	 */
-    	textArea= new JTextArea();
+    	//textArea= new JTextArea();
     	new DropTarget(textArea, myDragDropListener);	
     	columns[0] ="FILE";
     	columns[1] ="TITLE";
@@ -347,7 +347,7 @@ public class App {
         main.add(mainPanel);
        
     }
-    public void tableRemoveAllRows()
+    public static void tableRemoveAllRows()
     {
     	
     	int rowCount = tableModel.getRowCount();
@@ -785,8 +785,18 @@ public class App {
 	                        DefaultMutableTreeNode newPlay = new DefaultMutableTreeNode(Playlist);
 	                        playlist.add(newPlay);
 	                        treeForLeft.updateUI();
-	                        
+	                        treeForLeft.expandPath(new TreePath(playlist.getPath()));
+	                        //treeForLeft.setSelectionRow(1);
+	                        pathAfterCreation = new TreePath(newPlay.getPath());
+	                        treeForLeft.getExpandsSelectedPaths();
+	                        System.out.println(pathAfterCreation);
 	                        treeForLeft.setSelectionPath(pathAfterCreation);
+	                        treeForLeft.scrollPathToVisible(pathAfterCreation);
+	                        tableRemoveAllRows();
+	                        textArea.setText("Drop Songs Here To Add To : " + Playlist);
+	                        
+	                        
+	                        
             	}
 
 			} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
@@ -997,6 +1007,7 @@ public class App {
                    }
                    
     			}
+                  tableRemoveAllRows();
     				
     			}
     			
