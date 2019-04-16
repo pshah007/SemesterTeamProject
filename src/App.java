@@ -450,8 +450,11 @@ public class App {
               Year= id3v1Tag.getYear();
               Length= ""+mp3file.getLengthInSeconds();    		    
     	}
-    		 Query.insertSong(fileName,Title,Artist,Album,Genere,Year,Length,Playlist);
-    		 String rowEntry = "";
+    	int result =Query.checkSong(Title, Playlist);
+    	if(result==0)
+    	{
+   		 Query.insertSong(fileName,Title,Artist,Album,Genere,Year,Length,Playlist);
+   		 String rowEntry = "";
 				path = treeForLeft.getSelectionPaths();
 				String stk="";
 					for (TreePath path : path) {
@@ -465,18 +468,8 @@ public class App {
 					{
 						tableModel.addRow(rown);
 					}
-
-    				   
-
-    			   
-    			   /*
-   		    library.removeAllChildren();
-   		    System.out.println("ABOUT TO PRINT TABLE ROW COUNT BEFORE DEFUALTMUTABLETTREENODE "+table.getRowCount());
-    		   for (int i = 0; i < table.getRowCount(); i++) {
-    			  library.add(new DefaultMutableTreeNode(table.getModel().getValueAt(i, 1).toString()));
-		    }
-    		   */
-   	        //model.reload(library);
+    	}
+    	
     }
 
 	public void go(){

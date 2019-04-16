@@ -32,13 +32,14 @@ public class DBQuery
     	
     	DBQuery query = new DBQuery();
     	query.createConnection();
-    	query.dropTable();
-    	query.createTable();
-    	query.insertSong("TEST","TEST","TEST","TEST","TEST","1900","1","Library");
+    	//query.dropTable();
+    	//query.createTable();
+    	//query.insertSong("TEST","TEST","TEST","TEST","TEST","1900","1","Library");
     	//int temp = query.getPlaylistCount();
     	//String[][] stk2=playlistDisplaySongs("Library");
     	//System.out.println(temp);
-    	
+    	int t=query.checkSong("Give Me Novacaine","TEST1");
+    	System.out.println(t);
     	//for(int x = 0 ; x < stk2.length ; x++)
     	//{
     		//System.out.println(stk2[0][3]);
@@ -46,7 +47,7 @@ public class DBQuery
     	//query.createTable();
     	//query.selectSong();
     }
-    */
+   */
     
     
     public String[] searchSongByTitle(String Title) throws UnsupportedTagException, InvalidDataException, IOException
@@ -103,6 +104,38 @@ public class DBQuery
         }
         return new  String [] {path,title,artist,playlist};
     }
+    
+    public int checkSong(String Title, String Playlist) throws UnsupportedTagException, InvalidDataException, IOException
+    {
+    	int reuslt=0;
+    	
+        try
+        {
+        	stmt = conn.createStatement();
+            
+            String Query="SELECT * FROM Music WHERE Title ='"+Title+"' AND Playlist = '"+Playlist+"'";
+            ResultSet result = stmt.executeQuery(Query);
+            
+            if(result.next())
+            {
+            	reuslt=1;
+            }
+            stmt.close();
+        }
+        catch (SQLException sqlExcept)
+        {
+            sqlExcept.printStackTrace();
+        }
+        
+        return reuslt;
+    }
+    
+    
+    
+    
+    
+    
+    
     
     
     public void createTable()
@@ -257,6 +290,9 @@ public class DBQuery
     	try
         {
             stmt = conn.createStatement();
+           
+          
+   
             stmt.execute(
               		"insert into Music values(default,"+
               				"'"+FileName+"',"+
@@ -269,7 +305,7 @@ public class DBQuery
               				"default,"+
               				"'"+Playlist+"')");     
 
-            				//default,'HELLO','HELLo','HELLO','HELLO','HELLO',default)");
+
             stmt.close();
         }
         catch (SQLException sqlExcept)

@@ -2,18 +2,18 @@
 <classpath>
 	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
 	<classpathentry kind="src" path="src"/>
-	<classpathentry kind="lib" path="C:/Users/Aman Aslam/Desktop/Semester 2/543 ASE/SemesterTeamProject/lib/basicplayer3.0.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Aman Aslam/Desktop/Semester 2/543 ASE/SemesterTeamProject/lib/commons-logging-api.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Aman Aslam/Desktop/Semester 2/543 ASE/SemesterTeamProject/lib/derby.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Aman Aslam/Desktop/Semester 2/543 ASE/SemesterTeamProject/lib/jl1.0.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Aman Aslam/Desktop/Semester 2/543 ASE/SemesterTeamProject/lib/jogg-0.0.7.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Aman Aslam/Desktop/Semester 2/543 ASE/SemesterTeamProject/lib/jorbis-0.0.15.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Aman Aslam/Desktop/Semester 2/543 ASE/SemesterTeamProject/lib/jspeex0.9.7.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Aman Aslam/Desktop/Semester 2/543 ASE/SemesterTeamProject/lib/mp3agic-0.8.3-SNAPSHOT.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Aman Aslam/Desktop/Semester 2/543 ASE/SemesterTeamProject/lib/mp3agic-0.8.3-SNAPSHOT-javadoc.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Aman Aslam/Desktop/Semester 2/543 ASE/SemesterTeamProject/lib/mp3agic-0.8.3-SNAPSHOT-sources.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Aman Aslam/Desktop/Semester 2/543 ASE/SemesterTeamProject/lib/mp3spi1.9.5.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Aman Aslam/Desktop/Semester 2/543 ASE/SemesterTeamProject/lib/tritonus_share.jar"/>
-	<classpathentry kind="lib" path="C:/Users/Aman Aslam/Desktop/Semester 2/543 ASE/SemesterTeamProject/lib/vorbisspi1.0.2.jar"/>
+	<classpathentry kind="lib" path="D:/LIB/basicplayer3.0.jar"/>
+	<classpathentry kind="lib" path="D:/LIB/commons-logging-api.jar"/>
+	<classpathentry kind="lib" path="D:/LIB/derby.jar"/>
+	<classpathentry kind="lib" path="D:/LIB/jl1.0.jar"/>
+	<classpathentry kind="lib" path="D:/LIB/jogg-0.0.7.jar"/>
+	<classpathentry kind="lib" path="D:/LIB/jorbis-0.0.15.jar"/>
+	<classpathentry kind="lib" path="D:/LIB/jspeex0.9.7.jar"/>
+	<classpathentry kind="lib" path="D:/LIB/mp3agic-0.8.3-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="D:/LIB/mp3agic-0.8.3-SNAPSHOT-javadoc.jar"/>
+	<classpathentry kind="lib" path="D:/LIB/mp3agic-0.8.3-SNAPSHOT-sources.jar"/>
+	<classpathentry kind="lib" path="D:/LIB/mp3spi1.9.5.jar"/>
+	<classpathentry kind="lib" path="D:/LIB/tritonus_share.jar"/>
+	<classpathentry kind="lib" path="D:/LIB/vorbisspi1.0.2.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
