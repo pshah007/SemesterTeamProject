@@ -303,7 +303,7 @@ public class Playlist {
     }
     
     
-    public static void addSong(String fileName) throws UnsupportedTagException, InvalidDataException, IOException
+    public static void addSong(String fileName, String Playlist) throws UnsupportedTagException, InvalidDataException, IOException
     {
         Mp3File mp3file = new Mp3File(fileName);
         String Title =fileName.substring(fileName.lastIndexOf('\\')+1, fileName.length());
@@ -328,6 +328,8 @@ public class Playlist {
               Year= id3v1Tag.getYear();
               Length= ""+mp3file.getLengthInSeconds();    		    
     	}
+    	int result =Query.checkSong(Title, Playlist);
+    	if(result==0) {
     		 Query.insertSong(fileName,Title,Artist,Album,Genere,Year,Length,playlist);
     		 String rowEntry = "";
 			
@@ -337,6 +339,8 @@ public class Playlist {
 					//if(Playlist.equals(stk))
 					//{
 						tableModel.addRow(rown);
+    	}
+    		
 					//}
 
     				   
@@ -610,7 +614,7 @@ public class Playlist {
             	    DefaultTableModel contactTableModel = (DefaultTableModel) table.getModel();
             	   System.out.println(file.getPath());
             	   try {
-					addSong(file.getPath());
+					addSong(file.getPath(), playlist);
 				} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
@@ -694,15 +698,22 @@ public class Playlist {
                         for (File file1 : file) {
 
                             // Print out the file path
-                        	addSong(file1.getPath());
+                        	addSong(file1.getPath(), playlist);
                         	Stk+=file1.getPath()+"\n";
-                        	//textArea.setText(Stk);
+                        	textArea.setText(Stk);
                             System.out.println("File path is '" + file1.getPath() + "'.");
 
                         }
 
                     }
-
+                    else {
+                    	  String allFlavorData = (String)transferable.getTransferData(DataFlavor.stringFlavor);
+                          String filepath = allFlavorData.substring(0, allFlavorData.indexOf(".mp3") + 4);
+                          System.out.println(filepath);
+                          addSong(filepath, playlist);
+                          break;
+                    }
+                   
                 } catch (Exception e) {
 
                     // Print out the error stack
