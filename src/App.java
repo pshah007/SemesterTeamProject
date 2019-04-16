@@ -116,6 +116,7 @@ public class App {
     JSlider volume;
     static JTree treeForLeft ;
     static TreePath[] path ;
+    static TreePath pathAfterCreation; 
     static DefaultMutableTreeNode root ;
     static DefaultMutableTreeNode library ;
     static DefaultMutableTreeNode playlist ;
@@ -784,6 +785,8 @@ public class App {
 	                        DefaultMutableTreeNode newPlay = new DefaultMutableTreeNode(Playlist);
 	                        playlist.add(newPlay);
 	                        treeForLeft.updateUI();
+	                        
+	                        treeForLeft.setSelectionPath(pathAfterCreation);
             	}
 
 			} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
@@ -898,25 +901,38 @@ public class App {
 					
 		        	System.out.println("Yes this is the one");
 		        	   JFileChooser chooser = new JFileChooser();
+		        	   path = treeForLeft.getSelectionPaths();
+	    				String stk="";
+	                    for (TreePath path : path) {
+	                        stk= ""+path.getLastPathComponent();
+	                        break;
+	                    }
 		               if (chooser.showOpenDialog(main) == JFileChooser.APPROVE_OPTION) {
 		            	   File file = chooser.getSelectedFile();
 		            	    DefaultTableModel contactTableModel = (DefaultTableModel) table.getModel();
 		            	   
 		            	   System.out.println(file.getPath());
 		            	   try {
-							addSong(file.getPath(),"Library");
+		            		   if(stk.equals("Library")) {
+		            			   addSong(file.getPath(),"Library");
+		            		   }
+		            		   else {
+		            			   addSong(file.getPath(),"Library");
+		            			   addSong(file.getPath(), stk);
+		            		   }
+							
 						} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
 		               }
-              		    library.removeAllChildren();      		    
-               		   for (int t = 0; t < table.getRowCount(); t++) {
+              		    //library.removeAllChildren();      		    
+               		  /* for (int t = 0; t < table.getRowCount(); t++) {
                			  library.add(new DefaultMutableTreeNode(table.getModel().getValueAt(t, 1).toString()));
-           		    }
+           		    }*/
                		// System.out.println("ABOUT TO COUNT CHILD FOR ROOT AFTER ADDING "+ root.getChildCount());
 
-               		 model.reload(library);
+               		// model.reload(library);
 
 				}
     			

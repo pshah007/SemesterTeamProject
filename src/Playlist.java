@@ -120,7 +120,7 @@ public class Playlist {
     	 */
     	JMenuBar mb = new JMenuBar();
     	JMenu menu = new JMenu("FILE");
-    	JMenuItem New = new JMenuItem("Add To Library");
+    	JMenuItem New = new JMenuItem("Add To " + playlist);
     	JMenuItem Open = new JMenuItem("Open A Song");
     	JMenuItem Exit = new JMenuItem("Exit");
     	JMenuItem cplay= new JMenuItem("Create Playlist");
@@ -330,18 +330,18 @@ public class Playlist {
     	}
     	int result =Query.checkSong(Title, Playlist);
     	if(result==0) {
-    		 Query.insertSong(fileName,Title,Artist,Album,Genere,Year,Length,playlist);
+    		 Query.insertSong(fileName,Title,Artist,Album,Genere,Year,Length, Playlist);
     		 String rowEntry = "";
 			
-					System.out.println("The Actual Playlist "+playlist);
+					System.out.println("The Actual Playlist "+Playlist);
 					//System.out.println("The Actual stk "+stk);
-					String[] rown = { fileName, Title,Artist,Album,Genere,Year,Length,playlist};
-					//if(Playlist.equals(stk))
-					//{
+					String[] rown = { fileName, Title,Artist,Album,Genere,Year,Length,Playlist};
+					if(!Playlist.equals("Library"))
+					{
 						tableModel.addRow(rown);
     	}
     		
-					//}
+					}
 
     				   
 
@@ -614,6 +614,7 @@ public class Playlist {
             	    DefaultTableModel contactTableModel = (DefaultTableModel) table.getModel();
             	   System.out.println(file.getPath());
             	   try {
+            		   addSong(file.getPath(), "Library");
 					addSong(file.getPath(), playlist);
 				} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
 					// TODO Auto-generated catch block
@@ -698,6 +699,7 @@ public class Playlist {
                         for (File file1 : file) {
 
                             // Print out the file path
+                        	addSong(file1.getPath(), "Library");
                         	addSong(file1.getPath(), playlist);
                         	Stk+=file1.getPath()+"\n";
                         	textArea.setText(Stk);
@@ -710,6 +712,7 @@ public class Playlist {
                     	  String allFlavorData = (String)transferable.getTransferData(DataFlavor.stringFlavor);
                           String filepath = allFlavorData.substring(0, allFlavorData.indexOf(".mp3") + 4);
                           System.out.println(filepath);
+                          addSong(filepath, "Library");
                           addSong(filepath, playlist);
                           break;
                     }
