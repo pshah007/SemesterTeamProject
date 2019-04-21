@@ -28,7 +28,7 @@ public class DBQuery
    
 
    
-    /*public static void main(String[] args) throws UnsupportedTagException, InvalidDataException, IOException {
+    public static void main(String[] args) throws UnsupportedTagException, InvalidDataException, IOException {
     	
     	DBQuery query = new DBQuery();
     	query.createConnection();
@@ -46,7 +46,7 @@ public class DBQuery
     	//}
     	//query.createTable();
     	//query.selectSong();
-    }*/
+    }
    
     
     

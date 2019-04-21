@@ -9,6 +9,7 @@
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
+import java.awt.Point;
 import java.awt.Toolkit;
 import java.util.Enumeration;
 import java.util.List;
@@ -112,6 +113,7 @@ public class App {
     JButton Shuffle;
     JButton Delete;
     JButton Search;
+    RowPopup pop;
     JPanel btnPnl;
     JSlider volume;
     static JTree treeForLeft ;
@@ -285,12 +287,13 @@ public class App {
         btnPnl.add(bottombtnPn2, BorderLayout.LINE_START);
         btnPnl.add(bottombtnPn3, BorderLayout.LINE_END);
         
-        final RowPopup pop = new RowPopup(table);
+         pop = new RowPopup(table);
         
         table.addMouseListener(new MouseAdapter() {
 			public void mouseClicked(MouseEvent me) {
 				if(SwingUtilities.isRightMouseButton(me)) {
 					pop.show(me.getComponent(), me.getX(), me.getY() );
+					
 				}
 			}
 		});
@@ -1014,11 +1017,52 @@ public class App {
     		});
     		addPlaylist.addActionListener(new ActionListener() {
     			
-   
+    			 JPopupMenu pm;
+    			 DefaultTableModel tabm;
+    			 JTable tab;
     			public void actionPerformed(ActionEvent arg0) {
     				
     	
-    				String[] data2 = Query.playlistDisplay();
+    					String[] data2 = Query.playlistDisplay();
+    					pm = new JPopupMenu();
+    				 	tab = new JTable(); 
+    				 	String[] stk = new String[1];
+    				 	stk[0]="Playlist";
+    		            
+    				 	
+    				 	  tabm= new DefaultTableModel();
+    				 	  tabm.addColumn("Playlist",data2);
+    			          tab = new JTable();
+    			          tab.setModel(tabm);
+    			          tab.setDragEnabled(true);
+    			          pm.add(tab);
+      		              pm.setVisible(true);
+      		              pm.setLocation((int)main.getMousePosition().getX(),(int)main.getMousePosition().getY());
+      		              tab.addMouseListener(new java.awt.event.MouseAdapter() {
+      		              @Override
+      		              public void mouseClicked(java.awt.event.MouseEvent evt) {
+      		                  int row = tab.rowAtPoint(evt.getPoint());
+      		                  int col = tab.columnAtPoint(evt.getPoint());
+      		                  System.out.println("ROW IS "+row+" COL IS "+col);
+      		                  System.out.println("SELECTED PALYLIST IS  "+tab.getValueAt(row, 0));
+      		                System.out.println(table.getModel().getValueAt(table.getSelectedRow(), 0).toString());
+      	    				  try {
+      							addSong(table.getModel().getValueAt(table.getSelectedRow(), 0).toString(),""+tab.getValueAt(row, 0));
+      						  pm.setVisible(false);
+      						} catch (UnsupportedTagException | InvalidDataException | IOException e) {
+      							// TODO Auto-generated catch block
+      							e.printStackTrace();
+      						}
+      		                  
+      		                  
+      		              }
+
+      		              
+      		          });
+    				 	
+
+    		           // add(pm);
+    		            /*
     				  String stk =  (String) JOptionPane.showInputDialog(null,  
     			                "Please select the Playlist", "Playlist Selection",  
     			                JOptionPane.PLAIN_MESSAGE, null, data2, "Numbers");
@@ -1030,8 +1074,14 @@ public class App {
 					}
     				  
 					
-    				
+    				*/
+    		            /*add a mouselistener instead and listen to mouse clicks*/
+
+    
     			}
+    			
+
+    	        
     			
     		
     		});
