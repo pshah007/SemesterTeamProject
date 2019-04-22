@@ -122,6 +122,7 @@ public class App {
     static DefaultMutableTreeNode root ;
     static DefaultMutableTreeNode library ;
     static DefaultMutableTreeNode playlist ;
+    static JPopupMenu pm;
     static BasicPlayer player;
     static BasicController control ;
     static String[][] data;
@@ -904,8 +905,8 @@ public class App {
     		JMenuItem delete = new JMenuItem("Delete");
     		JMenuItem newWindow = new JMenuItem("Open in New Window");
     		JMenuItem delPlaylist = new JMenuItem("Delete Playlist");
-    		
     		JMenuItem addPlaylist = new JMenuItem("Add to playlist");
+    		
     		add.addActionListener(new ActionListener() {
 
 				@Override
@@ -1015,6 +1016,62 @@ public class App {
     			}
     			
     		});
+    	
+    		
+    		
+    		addPlaylist.addMouseListener(new MouseAdapter() {
+    			
+   			 DefaultTableModel tabm;
+   			 JTable tab;
+    			public void mouseEntered(MouseEvent me) {
+    				 
+        				
+        	
+        					String[] data2 = Query.playlistDisplay();
+        					pm = new JPopupMenu();
+        				 	tab = new JTable(); 
+        				 	String[] stk = new String[1];
+        				 	stk[0]="Playlist";
+        		            
+        				 	
+        				 	  tabm= new DefaultTableModel();
+        				 	  tabm.addColumn("Playlist",data2);
+        			          tab = new JTable();
+        			          tab.setModel(tabm);
+        			          tab.setDragEnabled(true);
+        			          pm.add(tab);
+          		              //pm.setVisible(true);
+          		              pm.show(me.getComponent(),me.getX(),me.getY());
+          		              //pop.show(me.getComponent(),me.getX(),me.getY());
+          		             // pm.setVisible(true);
+          		              tab.addMouseListener(new java.awt.event.MouseAdapter() {
+              		              @Override
+              		              public void mousePressed(java.awt.event.MouseEvent evt) {
+              		                  int row = tab.rowAtPoint(evt.getPoint());
+              		                  int col = tab.columnAtPoint(evt.getPoint());
+              		                  System.out.println("ROW IS "+row+" COL IS "+col);
+              		                  System.out.println("SELECTED PALYLIST IS  "+tab.getValueAt(row, 0));
+              		                System.out.println(table.getModel().getValueAt(table.getSelectedRow(), 0).toString());
+              	    				  try {
+              	    					pm.setVisible(true);
+              							addSong(table.getModel().getValueAt(table.getSelectedRow(), 0).toString(),""+tab.getValueAt(row, 0));
+              							//pm.setVisible(false);
+              						} catch (UnsupportedTagException | InvalidDataException | IOException e) {
+              							// TODO Auto-generated catch block
+              							e.printStackTrace();
+              						}
+              		                  
+              		                  
+              		              }   
+              		          });
+          		        	//pm.setVisible(false);
+    			}
+
+ 
+    		});
+    	
+    		
+    		/*
     		addPlaylist.addActionListener(new ActionListener() {
     			
     			 JPopupMenu pm;
@@ -1040,7 +1097,7 @@ public class App {
       		              pm.setLocation((int)main.getMousePosition().getX(),(int)main.getMousePosition().getY());
       		              tab.addMouseListener(new java.awt.event.MouseAdapter() {
       		              @Override
-      		              public void mouseClicked(java.awt.event.MouseEvent evt) {
+      		              public void mousePressed(java.awt.event.MouseEvent evt) {
       		                  int row = tab.rowAtPoint(evt.getPoint());
       		                  int col = tab.columnAtPoint(evt.getPoint());
       		                  System.out.println("ROW IS "+row+" COL IS "+col);
@@ -1061,23 +1118,6 @@ public class App {
       		          });
     				 	
 
-    		           // add(pm);
-    		            /*
-    				  String stk =  (String) JOptionPane.showInputDialog(null,  
-    			                "Please select the Playlist", "Playlist Selection",  
-    			                JOptionPane.PLAIN_MESSAGE, null, data2, "Numbers");
-    				  try {
-						addSong(table.getModel().getValueAt(table.getSelectedRow(), 0).toString(),stk);
-					} catch (UnsupportedTagException | InvalidDataException | IOException e) {
-						// TODO Auto-generated catch block
-						e.printStackTrace();
-					}
-    				  
-					
-    				*/
-    		            /*add a mouselistener instead and listen to mouse clicks*/
-
-    
     			}
     			
 
@@ -1085,6 +1125,7 @@ public class App {
     			
     		
     		});
+    		*/
     		
     		newWindow.addActionListener(new ActionListener() {
 
