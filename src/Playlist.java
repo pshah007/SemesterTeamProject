@@ -74,6 +74,7 @@ public class Playlist {
     
     
     static JFrame playlistWindow;
+    App app;
     static JTable table;
     JPanel bottombtnPnl;
     JPanel bottombtnPn2;
@@ -111,10 +112,11 @@ public class Playlist {
     /**
      * 
      */
-    public Playlist(String playlistName){
+    public Playlist(String playlistName, App appObj){
     	
     	playlist = playlistName;
     	playlistWindow = new JFrame(playlist);
+    	app = appObj;
     	/*
     	 * ADDING MENU BAR NAME FILE WHICH WILL CONTAIN NEW,OPEN,EXIT
     	 */
@@ -134,7 +136,29 @@ public class Playlist {
     	mb.add(menu);
     	
     	Exit.addActionListener(new exitJmenuButton());
-    	New.addActionListener(new newJmenuButton());
+    	New.addActionListener(new ActionListener() {
+
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				// TODO Auto-generated method stub
+				System.out.println("Yes this is the one");
+	        	   JFileChooser chooser = new JFileChooser();
+	               if (chooser.showOpenDialog(playlistWindow) == JFileChooser.APPROVE_OPTION) {
+	            	   File file = chooser.getSelectedFile();
+	            	    DefaultTableModel contactTableModel = (DefaultTableModel) table.getModel();
+	            	   System.out.println(file.getPath());
+	            	   try {
+	            		   addSong(file.getPath(), "Library");
+						addSong(file.getPath(), playlist);
+						Playlist.this.app.tableRefresh();
+					} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+	               }
+			}
+    		
+    	});
     	Open.addActionListener(new openJmenuButton());
     	cplay.addActionListener(new cplayJmenuButton());
     	playlistWindow.pack();
@@ -302,6 +326,42 @@ public class Playlist {
       
     }
     
+    public static void tableRemoveAllRows()
+    {
+    	
+    	int rowCount = tableModel.getRowCount();
+    	//Remove rows one by one from the end of the table
+    	for (int i = rowCount - 1; i >= 0; i--) {
+    		tableModel.removeRow(i);
+    	}
+    }
+    
+    public void tableRefresh() {
+    	
+    	String fileName;
+        String Title ;
+        String Artist=" ";
+        String Album =" ";
+        String Genere = " ";
+        String Year="";
+        String Length = "";
+        
+		
+		tableRemoveAllRows();
+
+	   data = Query.playlistDisplaySongs(playlist);
+	    for(int i=0; i<data.length; i++) {
+	        fileName=data[i][0];
+	        Title=data[i][1];
+	        Artist=data[i][2];
+	        Album =data[i][3];
+	        Genere = data[i][4];
+	        Year=data[i][5];
+	        Length =data[i][6];
+	        String[] rown = {fileName, Title,Artist,Album,Genere,Year,Length,playlist};
+	        tableModel.addRow(rown);
+	    }
+    }
     
     public static void addSong(String fileName, String Playlist) throws UnsupportedTagException, InvalidDataException, IOException
     {
@@ -603,27 +663,7 @@ public class Playlist {
      * RELATED TO THE JMENU BUTTON NEW
      * OPENS NEW BROWSER WINDOW TO SELECT SONG
      */
-    static class newJmenuButton implements ActionListener
-    {
-        public void actionPerformed(ActionEvent e)
-        {
-        	System.out.println("Yes this is the one");
-        	   JFileChooser chooser = new JFileChooser();
-               if (chooser.showOpenDialog(playlistWindow) == JFileChooser.APPROVE_OPTION) {
-            	   File file = chooser.getSelectedFile();
-            	    DefaultTableModel contactTableModel = (DefaultTableModel) table.getModel();
-            	   System.out.println(file.getPath());
-            	   try {
-            		   addSong(file.getPath(), "Library");
-					addSong(file.getPath(), playlist);
-				} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-               }
-         }
-    }
-    
+
     static class openJmenuButton implements ActionListener
     {
         public void actionPerformed(ActionEvent e)
@@ -704,6 +744,7 @@ public class Playlist {
                         	Stk+=file1.getPath()+"\n";
                         	textArea.setText(Stk);
                             System.out.println("File path is '" + file1.getPath() + "'.");
+                            System.out.println("amaka");
 
                         }
 
@@ -727,6 +768,10 @@ public class Playlist {
 
             // Inform that the drop is complete
             event.dropComplete(true);
+            
+            	System.out.println("bmaka");
+            	app.tableRefresh();
+            	
 
         }
 
@@ -751,7 +796,32 @@ public class Playlist {
     	public RowPopup(JTable table) {
     		JMenuItem add = new JMenuItem("Add");
     		JMenuItem delete = new JMenuItem("Delete");
-    		add.addActionListener(new newJmenuButton());
+    		
+    		add.addActionListener(new ActionListener() {
+
+				@Override
+				public void actionPerformed(ActionEvent e) {
+					// TODO Auto-generated method stub
+					System.out.println("Yes this is the one");
+		        	   JFileChooser chooser = new JFileChooser();
+		               if (chooser.showOpenDialog(playlistWindow) == JFileChooser.APPROVE_OPTION) {
+		            	   File file = chooser.getSelectedFile();
+		            	    DefaultTableModel contactTableModel = (DefaultTableModel) table.getModel();
+		            	   System.out.println(file.getPath());
+		            	   try {
+		            		   addSong(file.getPath(), "Library");
+							addSong(file.getPath(), playlist);
+							Playlist.this.app.tableRefresh();
+						} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
+							// TODO Auto-generated catch block
+							e1.printStackTrace();
+						}
+		               }
+				}
+    			
+    		});
+    		
+    		
     		delete.addActionListener(new ActionListener() {
 
     			@Override

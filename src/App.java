@@ -133,6 +133,7 @@ public class App {
     final static JTextArea textArea = new JTextArea();
     static boolean isPaused = false;
     JLabel nowPlaying = new JLabel("");
+    Playlist playlistwindow;
 
     
 	   
@@ -351,6 +352,40 @@ public class App {
         main.add(mainPanel);
        
     }
+    
+    public void tableRefresh() {
+    	
+    	String fileName;
+        String Title ;
+        String Artist=" ";
+        String Album =" ";
+        String Genere = " ";
+        String Year="";
+        String Length = "";
+        
+		path = treeForLeft.getSelectionPaths();
+		String stk="";
+        for (TreePath path : path) {
+            stk= ""+path.getLastPathComponent();
+            break;
+        }
+		tableRemoveAllRows();
+
+	   data = Query.playlistDisplaySongs(stk);
+	    for(int i=0; i<data.length; i++) {
+	        fileName=data[i][0];
+	        Title=data[i][1];
+	        Artist=data[i][2];
+	        Album =data[i][3];
+	        Genere = data[i][4];
+	        Year=data[i][5];
+	        Length =data[i][6];
+	        String[] rown = {fileName, Title,Artist,Album,Genere,Year,Length,stk};
+	        tableModel.addRow(rown);
+	    }
+    }
+    
+    
     public static void tableRemoveAllRows()
     {
     	
@@ -722,12 +757,12 @@ public class App {
             	   
             	   System.out.println(file.getPath());
    				//System.out.println("YOU ARE IN DETELE PLAYLIST SECTION");
-   				path = treeForLeft.getSelectionPaths();
-   				String stk="";
-                   for (TreePath path : path) {
+   				//path = treeForLeft.getSelectionPaths();
+   				String stk="Library";
+                  /* for (TreePath path : path) {
                        stk= ""+path.getLastPathComponent();
                        break;
-                   }
+                   }*/
             	   
             	   
             	   
@@ -879,7 +914,7 @@ public class App {
 
             // Inform that the drop is complete
             event.dropComplete(true);
-
+            playlistwindow.tableRefresh();
         }
 
         @Override
@@ -939,6 +974,9 @@ public class App {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();
 						}
+		               }
+		               if(playlistwindow != null) {
+		            	   playlistwindow.tableRefresh();
 		               }
               		    //library.removeAllChildren();      		    
                		  /* for (int t = 0; t < table.getRowCount(); t++) {
@@ -1139,7 +1177,7 @@ public class App {
                         break;
                     }
                     System.out.println("this is the selected one : " +stk);
-					Playlist playlistwindow = new Playlist(stk);
+					playlistwindow = new Playlist(stk, App.this);
 					
 				}
     			
