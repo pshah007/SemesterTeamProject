@@ -7,6 +7,7 @@
 
 
 import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Point;
@@ -60,11 +61,15 @@ import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTree;
 import javax.swing.ListSelectionModel;
+import javax.swing.MenuElement;
+import javax.swing.MenuSelectionManager;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 import javax.swing.event.TreeSelectionEvent;
 import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableModel;
@@ -940,7 +945,8 @@ public class App {
     		JMenuItem delete = new JMenuItem("Delete");
     		JMenuItem newWindow = new JMenuItem("Open in New Window");
     		JMenuItem delPlaylist = new JMenuItem("Delete Playlist");
-    		JMenuItem addPlaylist = new JMenuItem("Add to playlist");
+    		JMenu addPlaylist = new JMenu("Add to playlist");
+    		//JMenuItem addPlaylist = new JMenuItem("Add to playlist");
     		
     		add.addActionListener(new ActionListener() {
 
@@ -1056,58 +1062,49 @@ public class App {
     		});
     	
     		
-    		
-    		addPlaylist.addMouseListener(new MouseAdapter() {
-    			
-   			 DefaultTableModel tabm;
-   			 JTable tab;
-    			public void mouseEntered(MouseEvent me) {
-    				 
-        				
-        	
-        					String[] data2 = Query.playlistDisplay();
-        					pm = new JPopupMenu();
-        				 	tab = new JTable(); 
-        				 	String[] stk = new String[1];
-        				 	stk[0]="Playlist";
-        		            
-        				 	
-        				 	  tabm= new DefaultTableModel();
-        				 	  tabm.addColumn("Playlist",data2);
-        			          tab = new JTable();
-        			          tab.setModel(tabm);
-        			          tab.setDragEnabled(true);
-        			          pm.add(tab);
-          		              //pm.setVisible(true);
-          		              pm.show(me.getComponent(),me.getX(),me.getY());
-          		              //pop.show(me.getComponent(),me.getX(),me.getY());
-          		             // pm.setVisible(true);
-          		              tab.addMouseListener(new java.awt.event.MouseAdapter() {
-              		              @Override
-              		              public void mousePressed(java.awt.event.MouseEvent evt) {
-              		                  int row = tab.rowAtPoint(evt.getPoint());
-              		                  int col = tab.columnAtPoint(evt.getPoint());
-              		                  System.out.println("ROW IS "+row+" COL IS "+col);
-              		                  System.out.println("SELECTED PALYLIST IS  "+tab.getValueAt(row, 0));
-              		                System.out.println(table.getModel().getValueAt(table.getSelectedRow(), 0).toString());
-              	    				  try {
-              	    					pm.setVisible(true);
-              							addSong(table.getModel().getValueAt(table.getSelectedRow(), 0).toString(),""+tab.getValueAt(row, 0));
-              							//pm.setVisible(false);
-              						} catch (UnsupportedTagException | InvalidDataException | IOException e) {
-              							// TODO Auto-generated catch block
-              							e.printStackTrace();
-              						}
-              		                  
-              		                  
-              		              }   
-              		          });
-          		        	//pm.setVisible(false);
-    			}
+    		addPlaylist.addMenuListener(new MenuListener() {
 
- 
-    		});
-    	
+                JMenuItem menuItem;
+                public void menuSelected(MenuEvent me) {
+                	addPlaylist.removeAll();//remove previous opened window jmenuitems
+                	
+                	String[] 
+					data2=	Query.playlistDisplay();
+					for(int i=0;i<data2.length;i++)
+					{
+                        menuItem = new JMenuItem(data2[i]);
+                        addPlaylist.add(menuItem);
+                        menuItem.addActionListener(new ActionListener() {
+                        	public void actionPerformed(ActionEvent arg0) {
+                        		 JMenuItem menuitem=(JMenuItem) arg0.getSource();
+                                 JPopupMenu popupMenu =(JPopupMenu) menuitem.getParent();
+                                 int index= popupMenu.getComponentIndex(menuitem);
+                                 System.out.println("index:"+ data2[index].toString());
+                           	  try {
+        							addSong(table.getModel().getValueAt(table.getSelectedRow(), 0).toString(),data2[index].toString());
+        						} catch (UnsupportedTagException | InvalidDataException | IOException e) {
+        							// TODO Auto-generated catch block
+        							e.printStackTrace();
+        						}
+                        	}
+                        }
+                        );
+					}
+
+	
+                }
+
+                @Override
+                public void menuDeselected(MenuEvent me) {
+                }
+
+                @Override
+                public void menuCanceled(MenuEvent me) {
+                }
+            });
+    		
+    		
+    		
     		
     		/*
     		addPlaylist.addActionListener(new ActionListener() {
