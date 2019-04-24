@@ -12,6 +12,7 @@ import java.awt.Dimension;
 import java.awt.FlowLayout;
 import java.awt.Point;
 import java.awt.Toolkit;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Random;
@@ -139,7 +140,7 @@ public class App {
     static boolean isPaused = false;
     JLabel nowPlaying = new JLabel("");
     Playlist playlistwindow;
-
+    ArrayList<Playlist> play = new ArrayList<Playlist>(); // Create an ArrayList object
     
 	   
 	    
@@ -1056,7 +1057,18 @@ public class App {
                    
     			}
                   tableRemoveAllRows();
-    				
+                  int temp=0;
+                  for(int i=0;i<play.size();i++)
+                  {
+                	  if(play.get(i).getFrameName().equals(stk))
+                	  {
+                		  System.out.println("ABOT TO CLOSE "+stk);
+                		  play.get(i).exit();
+                		  temp=i;
+                	  }
+                  }
+                 // play.remove(temp);
+                
     			}
     			
     		});
@@ -1082,6 +1094,10 @@ public class App {
                                  System.out.println("index:"+ data2[index].toString());
                            	  try {
         							addSong(table.getModel().getValueAt(table.getSelectedRow(), 0).toString(),data2[index].toString());
+        							if(playlistwindow!=null)
+        							{
+        								playlistwindow.tableRefresh();
+        							}
         						} catch (UnsupportedTagException | InvalidDataException | IOException e) {
         							// TODO Auto-generated catch block
         							e.printStackTrace();
@@ -1173,8 +1189,13 @@ public class App {
                         stk= ""+path.getLastPathComponent();
                         break;
                     }
-                    System.out.println("this is the selected one : " +stk);
+                    System.out.println("this is the selected one : " +play.size());
 					playlistwindow = new Playlist(stk, App.this);
+					treeForLeft.setSelectionPath(new TreePath(library.getPath()));
+					textArea.setText("Drop Songs Here To Add To : Library");
+					App.this.tableRefresh();
+					play.add(playlistwindow);
+					
 					
 				}
     			

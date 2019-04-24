@@ -156,6 +156,7 @@ public class Playlist {
 						e1.printStackTrace();
 					}
 	               }
+	               app.tableRefresh();
 			}
     		
     	});
@@ -361,6 +362,15 @@ public class Playlist {
 	        String[] rown = {fileName, Title,Artist,Album,Genere,Year,Length,playlist};
 	        tableModel.addRow(rown);
 	    }
+    }
+    
+    public String getFrameName()
+    {
+    	return playlist;
+    }
+    public void exit()
+    {
+    	 playlistWindow.setVisible(false);
     }
     
     public static void addSong(String fileName, String Playlist) throws UnsupportedTagException, InvalidDataException, IOException
