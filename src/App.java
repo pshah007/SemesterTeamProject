@@ -243,6 +243,7 @@ public class App {
           table = new JTable();
           table.setModel(tableModel);
           table.setDragEnabled(true);
+          table.setAutoCreateRowSorter(true);
           MouseListener mouseListener = new MouseAdapter() {
               //this will print the selected row index when a user clicks the table
               public void mousePressed(MouseEvent e) {

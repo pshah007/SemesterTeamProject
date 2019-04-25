@@ -28,7 +28,7 @@ public class DBQuery
    
 
    
-    public static void main(String[] args) throws UnsupportedTagException, InvalidDataException, IOException {
+    /*public static void main(String[] args) throws UnsupportedTagException, InvalidDataException, IOException {
     	
     	DBQuery query = new DBQuery();
     	query.createConnection();
@@ -46,7 +46,7 @@ public class DBQuery
     	//}
     	//query.createTable();
     	//query.selectSong();
-    }
+    }*/
    
     
     
@@ -503,7 +503,7 @@ public class DBQuery
             System.out.println("IAM HERE ");
 	        stk = new String[numberRows][numberCols-2];
 	        
-	        results = stmt.executeQuery("select * from MUSIC where Playlist = '"+play+"'"+" AND File <>'TEST' AND Title <>'TEST'");
+	        results = stmt.executeQuery("select * from MUSIC where Playlist = '"+play+"'"+" AND File <>'TEST' AND Title <>'TEST' order by Title asc");
 	        int t=0;
 	        while(results.next())
 	        {
