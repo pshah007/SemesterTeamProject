@@ -243,7 +243,12 @@ public class App {
           table = new JTable();
           table.setModel(tableModel);
           table.setDragEnabled(true);
-          table.setAutoCreateRowSorter(true);
+          
+          table.setAutoCreateRowSorter(true); //adding the sorting functionality on all columns
+          
+          /*hiding File column*/
+          table.getColumnModel().removeColumn(table.getColumnModel().getColumn(0));
+          
           MouseListener mouseListener = new MouseAdapter() {
               //this will print the selected row index when a user clicks the table
               public void mousePressed(MouseEvent e) {
