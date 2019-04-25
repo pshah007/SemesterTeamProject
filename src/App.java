@@ -161,9 +161,32 @@ public class App {
     	menu.add(Open);
     	menu.add(createPlaylist);
     	menu.add(Exit);
+    	
+    	
+    	JMenu menu2 = new JMenu("CONTROLS");
+    	JMenuItem Play2 = new JMenuItem("Play");
+    	JMenuItem Next2 = new JMenuItem("Next");
+    	JMenuItem Previous2 = new JMenuItem("Previous");
+    	JMenuItem Playrecent2= new JMenuItem("Play Recent");
+    	JMenuItem Currentsongt2= new JMenuItem("Go to  Current Song");
+    	JMenuItem Increasevol2= new JMenuItem("Increase Volume");
+    	JMenuItem Decreasevol2= new JMenuItem("Decrease Volume");
+    	JMenuItem Shuffle2= new JMenuItem("Shuffle");
+    	JMenuItem Repeat2= new JMenuItem("Repeat");
 
 
+    	menu2.add(Play2);
+    	menu2.add(Next2);
+    	menu2.add(Previous2);
+    	menu2.add(Playrecent2);
+    	menu2.add(Currentsongt2);
+    	menu2.add(Increasevol2);
+    	menu2.add(Decreasevol2);
+    	menu2.add(Shuffle2);
+    	menu2.add(Repeat2);
+    	
     	mb.add(menu);
+    	mb.add(menu2);
     	
     	Exit.addActionListener(new exitJmenuButton());
     	New.addActionListener(new newJmenuButton());
