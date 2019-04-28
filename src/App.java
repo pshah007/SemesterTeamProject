@@ -26,6 +26,7 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
@@ -61,6 +62,7 @@ import javax.swing.JSlider;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.JTree;
+import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.MenuElement;
 import javax.swing.MenuSelectionManager;
@@ -138,7 +140,7 @@ public class App {
     static DBQuery Query;
     final static JTextArea textArea = new JTextArea();
     static boolean isPaused = false;
-    JLabel nowPlaying = new JLabel("");
+    static JLabel nowPlaying = new JLabel("");
     Playlist playlistwindow;
     ArrayList<Playlist> play = new ArrayList<Playlist>(); // Create an ArrayList object
     
@@ -174,7 +176,16 @@ public class App {
     	JMenuItem Shuffle2= new JMenuItem("Shuffle");
     	JMenuItem Repeat2= new JMenuItem("Repeat");
 
-
+    	/*
+    	Next2.setAccelerator(
+   	         KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
+    	*/
+    	Next2.setAccelerator(
+    	         KeyStroke.getKeyStroke(KeyEvent.VK_O, ActionEvent.CTRL_MASK));
+    	Next2.addActionListener(new Next2JmenuButton());
+    	
+    	
+    	
     	menu2.add(Play2);
     	menu2.add(Next2);
     	menu2.add(Previous2);
@@ -775,6 +786,38 @@ public class App {
             System.exit(0);
         }
     }
+    
+    static class Next2JmenuButton implements ActionListener
+    {
+        public void actionPerformed(ActionEvent e)
+        {
+            File file=null;
+            int column = 0;
+        	int row = table.getSelectedRow();
+        	if(row==table.getRowCount()-1) {
+        		row=0;
+        	}
+        	else
+        		row = row+1;	
+        	String Title = table.getModel().getValueAt(row, 1).toString();
+    		String Artist = table.getModel().getValueAt(row, 2).toString();
+    		nowPlaying.setText("<html>Now Playing: &nbsp;&nbsp;<br/>" + Title + "&nbsp;&nbsp;<br/> by &nbsp;&nbsp;<br/>" + Artist + "&nbsp;&nbsp;</html>");
+        	table.changeSelection(row, column, false, false);
+        	isPaused = false;
+        	try {
+        		player.open(new URL("file:///" + table.getModel().getValueAt(row, column).toString()));
+        	    player.play();
+			} catch (BasicPlayerException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			} catch (MalformedURLException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+         }
+    }
+    
+    
     
     /*
      * RELATED TO THE JMENU BUTTON NEW
