@@ -16,7 +16,6 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 import java.util.Random;
-import java.util.Timer;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
 import java.awt.dnd.DnDConstants;
@@ -73,6 +72,7 @@ import javax.swing.MenuElement;
 import javax.swing.MenuSelectionManager;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.event.ListSelectionEvent;
@@ -118,7 +118,7 @@ public class App {
     static JScrollPane scrollLibrary; 
     static JScrollPane scrollPlaylist; 
     int CurrentSelectedRow;
-    JButton Play;
+    static JButton Play;
     JButton Pause;
     JButton Stop;
     JButton Previous;
@@ -160,7 +160,7 @@ public class App {
     static JCheckBoxMenuItem Shuffle2 ;
     static JCheckBoxMenuItem Repeat2 ;
     static JMenuBar mb ;
-    
+    static Mp3File mp3file;
     static JLabel tottimeLabel;
     static JLabel remTimeLabel;
     static JMenuItem New ;
@@ -170,8 +170,20 @@ public class App {
     static Random rand;
     static int lastRandom=-1;
     static JProgressBar progressBar;
-    
-    Playlist playlistwindow;
+    static Timer progressTimer ;
+    static long lengthOfSongInSeconds=0;
+    static long progressEverySecond=0;
+    static int pointerPr;
+    static int threadStop=0;
+    static int row =0;
+    static int next = 0;
+    static int stopCheck=0;
+    static int previous = 0; 
+    static int playControl=0;
+    static int  currentSelectedSong = 0;
+    static Playlist playlistwindow;
+    static int pointerDg = 0;
+    static int pointerPs = 0;
     ArrayList<Playlist> play = new ArrayList<Playlist>(); // Create an ArrayList object
     
 	   
@@ -220,6 +232,9 @@ public class App {
     	Decreasevol2.addActionListener(new Decreasevol2JmenuButton());
     	
     	
+    	Currentsongt2.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, java.awt.event.InputEvent.CTRL_MASK));
+       
+    	Currentsongt2.addActionListener(new Currentsongt2JmenuButton());
     	Play2.setAccelerator(
     	         KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
     	Play2.addActionListener(new Play2JmenuButton());
@@ -470,31 +485,35 @@ public class App {
        
     }
 
-    private void ProgressBarSetup() throws IOException {
+    private static void ProgressBarSetup() throws IOException {
     	progressBar.setMaximum(fin.available());
         progressBar.setMinimum(0);
         
     }
-    /*
-    private void progressBarSeek(long progressClick) throws BasicPlayerException {
-        progressBar.setValue((int) progressClick);
-        pointerProgress = (int) (progressClick / progressOneSecond);
-        pointerDegress = (int) (songLengthSeconds - pointerProgress);
-        player.seek(progressClick);
-    }
+   
     
-    
-    private void progressBarMouseClicked(java.awt.event.MouseEvent evt) {//GEN-FIRST:event_progressBarMouseClicked
+    public static void playSong() {
+        next = 0;
+        previous = 0;
         try {
-            if (songLocation != null) {
-                progressClick = (long) (((double) evt.getX() / (double) progressBar.getWidth()) * progressBar.getMaximum());
-                progressBarSeek(progressClick);
+            if (threadStop != 0) {
+                stop();
             }
+            stopCheck = 0;
+
+            currentSelectedSong = table.getSelectedRow(); 
+    		String Title = table.getModel().getValueAt(row, 1).toString();
+    		String Artist = table.getModel().getValueAt(row, 2).toString();
+    		nowPlaying.setText("<html>Now Playing:  &nbsp;&nbsp; <br/>" + Title + "&nbsp;&nbsp;<br/> by &nbsp;&nbsp; <br/>" + Artist + "&nbsp;&nbsp;</html>");
+    	    player.open(new URL("file:///" + table.getModel().getValueAt(row, 0).toString()));
+    	    player.play();
+            threadStop = 1;
+        } catch (IOException ex) {
+            System.out.println("Error in SongData_TableMouseClicked Method from MusicPlayerGui class...." + ex);
         } catch (BasicPlayerException ex) {
-            System.out.println("Error in progressBarMouseClicked method....." + ex);
+           
         }
     }
-    */
 
     public void tableRefresh() {
     	
@@ -611,7 +630,7 @@ public class App {
     
     public static void addSong(String fileName,String Playlist) throws UnsupportedTagException, InvalidDataException, IOException
     {
-        Mp3File mp3file = new Mp3File(fileName);
+         mp3file = new Mp3File(fileName);
         String Title =fileName.substring(fileName.lastIndexOf('\\')+1, fileName.length());
         Title = Title.substring(0,Title.indexOf('.'));
         String Artist=" ";
@@ -663,7 +682,26 @@ public class App {
     }
 
 	
-
+	public static void stop()
+	{
+		isPaused = false;
+    	nowPlaying.setText("");
+    	try {
+    		
+			player.stop();
+			disablePlay();
+            stopCheck = 1;
+            playControl = 0;
+            progressTimer.stop();
+            pointerPr = 0;
+            progressBar.setValue(0);
+            remTimeLabel.setText("00:00:00");
+            tottimeLabel.setText(getTimeFormat(lengthOfSongInSeconds));
+		} catch (BasicPlayerException | IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	}
 
 
     class ButtonListener implements ActionListener {
@@ -673,7 +711,7 @@ public class App {
         	int row = table.getSelectedRow();
             if("Play".equals(e.getActionCommand())){
             	try {
-            		fin = new FileInputStream(table.getModel().getValueAt(row, column).toString());
+            		fin = new FileInputStream(new File(table.getModel().getValueAt(row, column).toString()));
             		String Title = table.getModel().getValueAt(row, 1).toString();
             		String Artist = table.getModel().getValueAt(row, 2).toString();
             		nowPlaying.setText("<html>Now Playing:  &nbsp;&nbsp; <br/>" + Title + "&nbsp;&nbsp;<br/> by &nbsp;&nbsp; <br/>" + Artist + "&nbsp;&nbsp;</html>");
@@ -748,11 +786,24 @@ public class App {
             	isPaused = false;
             	nowPlaying.setText("");
             	try {
+            		
 					player.stop();
-				} catch (BasicPlayerException e1) {
+					disablePlay();
+	                stopCheck = 1;
+	                playControl = 0;
+	                progressTimer.stop();
+	                pointerPr = 0;
+	                progressBar.setValue(0);
+	                remTimeLabel.setText("00:00:00");
+	                tottimeLabel.setText(getTimeFormat(lengthOfSongInSeconds));
+				} catch (BasicPlayerException | IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
+            	
+                
+            	
+            	
             }
             if(e.getSource()==Pause)
             {
@@ -823,21 +874,7 @@ public class App {
 					e1.printStackTrace();
 				}
             }
-            /*if("Repeat".contentEquals(e.getActionCommand()))
-            {
-            	isPaused = false;
-            	
-            	try {
-            		player.open(new URL("file:///" + table.getModel().getValueAt(row, column).toString()));
-            	    player.play();
-				} catch (BasicPlayerException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (MalformedURLException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-            }*/
+
             if("Shuffle".contentEquals(e.getActionCommand()))
             {
             	isPaused = false;
@@ -889,46 +926,94 @@ public class App {
     
     static class Play2JmenuButton implements ActionListener
     {
+    	  
         public void actionPerformed(ActionEvent e)
         {
-           
-            if (Shuffle2.isSelected()) {
-                System.out.println("SHUFFLE IS SLECTED");
-            } 
-        	
-            File file=null;
-            int column = 0;
-        	int row = table.getSelectedRow();
+        	playControl=1;
+        	 int column = 0;
+      	   		row = table.getSelectedRow();
+      	   	currentSelectedSong=row;
         	if(row<0)
         	{
         		row=0;
+        		currentSelectedSong=row;
         	}
+        	
+        	try {
+				mp3file = new Mp3File(table.getModel().getValueAt(row, column).toString());
+				fin = new FileInputStream(new File(table.getModel().getValueAt(row, column).toString()));
+				ProgressBarSetup();
+				lengthOfSongInSeconds = mp3file.getLengthInSeconds();
+				pointerDg=(int) lengthOfSongInSeconds;
+				System.out.println("FIN AVALIABLE "+fin.available());
+				System.out.println("lengthOfSongInSeconds "+lengthOfSongInSeconds);
+				progressEverySecond = (fin.available() / lengthOfSongInSeconds);
+			} catch (UnsupportedTagException | InvalidDataException | IOException e2) {
+				// TODO Auto-generated catch block
+				e2.printStackTrace();
+			}
+        	
+            progressTimer = new Timer(1000, new ActionListener() {
+                @Override
+                public void actionPerformed(ActionEvent e) {
+                    if (pointerPr < lengthOfSongInSeconds) {
+                    	System.out.println("PROGRESS BAR SETUP VALUE "+Math.round(progressEverySecond * pointerPr));
+                    	progressBar.setValue(Math.round(progressEverySecond * pointerPr));
+                        if (pointerPs == 0) {
+                            pointerPr++;
+                            pointerDg--;
+                            System.out.println("pointerPr Value "+pointerPr);
+                            System.out.println("pointerDg Value "+pointerDg);
+                            System.out.println("progressEverySecond Value "+progressEverySecond);
+        	                remTimeLabel.setText(getTimeFormat(pointerPr));
+        	                tottimeLabel.setText(getTimeFormat(pointerDg));
+
+                        }
+                            System.out.println("Song progress "+pointerPr+" The Length second "+lengthOfSongInSeconds);
+                            
+                        }
+                    else {
+                    		stop();
+                            nowPlaying.setText("");
+                            if (Repeat2.isSelected()) {
+                            	
+                            	System.out.println("REPEATE SELECTED pointer progress "+pointerPr);
+                            	playSong();	
+                            } 
+                            /*
+                            else if (shuffle_check_menuItem.isSelected()) {
+                                shuffle();
+                            } else {
+                                next_Song_ButtonMouseClicked(null);
+                            }
+                            */
+                        
+                    }
+                    
+                    
+                }
+            });
+        	
+            progressTimer.start();
         	try {
         		String Title = table.getModel().getValueAt(row, 1).toString();
         		String Artist = table.getModel().getValueAt(row, 2).toString();
         		nowPlaying.setText("<html>Now Playing:  &nbsp;&nbsp; <br/>" + Title + "&nbsp;&nbsp;<br/> by &nbsp;&nbsp; <br/>" + Artist + "&nbsp;&nbsp;</html>");
         	    player.open(new URL("file:///" + table.getModel().getValueAt(row, column).toString()));
         	    player.play();
-        	    if(Repeat2.isSelected())
-        	    {
-        	    	
-        	    	int row2 = table.getSelectedRow();
-            		String Title2 = table.getModel().getValueAt(row, 1).toString();
-            		String Artist2 = table.getModel().getValueAt(row, 2).toString();
-            		nowPlaying.setText("<html>Now Playing:  &nbsp;&nbsp; <br/>" + Title2 + "&nbsp;&nbsp;<br/> by &nbsp;&nbsp; <br/>" + Artist2 + "&nbsp;&nbsp;</html>");
-            	    player.open(new URL("file:///" + table.getModel().getValueAt(row2, column).toString()));
-            	    player.play();
-        	    	
-        	    	
-        	    }
-        	} catch (BasicPlayerException | MalformedURLException e1) {
+        	    disablePlay();
+        	} catch (BasicPlayerException  | IOException e1) {
         	    e1.printStackTrace();
         	}
-        	//testPlay(table.getModel().getValueAt(row, column).toString());
+        	
          }
     }
     
-    
+    private static void disablePlay() throws IOException {
+
+        Play2.setSelected(false);
+        Play.setSelected(false);
+    }
     
     static class Increasevol2JmenuButton implements ActionListener
     {
@@ -963,6 +1048,37 @@ public class App {
          }
     }
     
+    static class Currentsongt2JmenuButton implements ActionListener
+    {
+        public void actionPerformed(ActionEvent e)
+        {
+                table.setRowSelectionInterval(currentSelectedSong, currentSelectedSong);
+                table.scrollRectToVisible(table.getCellRect(currentSelectedSong, 0, true));
+        
+
+         }
+    }
+    
+    
+    private static String getTimeFormat(long seconds) {
+    	int min, sec;
+        String time;
+
+        min = (int) seconds / 60;
+        sec = (int) seconds % 60;
+
+        if (min < 10) {
+            time = "00:0" + Integer.toString(min);
+        } else {
+            time = "00:" + Integer.toString(min);
+        }
+        if (sec < 10) {
+            time = time + ":0" + Integer.toString(sec);
+        } else {
+            time = time + ":" + Integer.toString(sec);
+        }
+        return time;
+    }
     
     
     static class Next2JmenuButton implements ActionListener
@@ -1004,10 +1120,11 @@ public class App {
             File file=null;
             int column = 0;
         	int row = table.getSelectedRow();
-        	if(row==table.getRowCount()-1) {
-        		row=0;
+        	if(row==0) {
+        		row = table.getRowCount()-1;
         	}
         	else
+        		
         		row = row-1;	
         	String Title = table.getModel().getValueAt(row, 1).toString();
     		String Artist = table.getModel().getValueAt(row, 2).toString();
@@ -1031,40 +1148,6 @@ public class App {
     
     
     
-    static class Repeat2JmenuButton implements ActionListener
-    {
-        public void actionPerformed(ActionEvent e)
-        {
-            File file=null;
-            int column = 0;
-        	int row = table.getSelectedRow();
-        	
-        	try {
-        		String Title = table.getModel().getValueAt(row, 1).toString();
-        		String Artist = table.getModel().getValueAt(row, 2).toString();
-        		Mp3File mp3file = new Mp3File(table.getModel().getValueAt(row, 0).toString());
-        		System.out.println("THE LEGNTH OF THE TRACK IS "+mp3file.getLengthInSeconds());
-        		Timer timer = new Timer();
-        		
-        		nowPlaying.setText("<html>Now Playing:  &nbsp;&nbsp; <br/>" + Title + "&nbsp;&nbsp;<br/> by &nbsp;&nbsp; <br/>" + Artist + "&nbsp;&nbsp;</html>");
-        	    player.open(new URL("file:///" + table.getModel().getValueAt(row, column).toString()));
-        	    player.play();
-        	} catch (BasicPlayerException | MalformedURLException e1) {
-        	    e1.printStackTrace();
-        	}
-        	//testPlay(table.getModel().getValueAt(row, column).toString());
- catch (UnsupportedTagException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (InvalidDataException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			} catch (IOException e1) {
-				// TODO Auto-generated catch block
-				e1.printStackTrace();
-			}
-         }
-    }
     
     
     /*
