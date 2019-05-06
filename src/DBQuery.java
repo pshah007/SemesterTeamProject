@@ -27,28 +27,35 @@ public class DBQuery
     private static String dbURL ="jdbc:derby:codejava/webdb1;create=true";
    
 
-   
-    /*public static void main(String[] args) throws UnsupportedTagException, InvalidDataException, IOException {
+   /*
+    public static void main(String[] args) throws UnsupportedTagException, InvalidDataException, IOException {
     	
     	DBQuery query = new DBQuery();
+    	
     	query.createConnection();
-    	query.dropTable();
-    	query.createTable();
-    	query.insertSong("TEST","TEST","TEST","TEST","TEST","1900","1","Library");
+    	
+    	//query.dropTable();
+    	//query.dropTableRecentlyDrop();
+    	//query.createTable();
+    	//query.insertSong("TEST","TEST","TEST","TEST","TEST","1900","1","Library");
+    	
+    	//query.selectSongFromRecentlyPlayed();
+    	//String stk =query.recentlyPlayedDisplayFileName("American Idiot");
+    	//System.out.println(stk);
     	//int temp = query.getPlaylistCount();
-    	//String[][] stk2=playlistDisplaySongs("Library");
+    	//String[] stk2=query.recentlyPlayedDisplay();
     	//System.out.println(temp);
     	//int t=query.checkSong("Give Me Novacaine","TEST1");
     	//System.out.println(t);
     	//for(int x = 0 ; x < stk2.length ; x++)
     	//{
-    		//System.out.println(stk2[0][3]);
+    	//	System.out.println(stk2[x]);
     	//}
     	//query.createTable();
     	//query.selectSong();
-    }*/
+    }
    
-    
+    */
     
     public String[] searchSongByTitle(String Title) throws UnsupportedTagException, InvalidDataException, IOException
     {
@@ -163,6 +170,13 @@ public class DBQuery
                 		+ "Playlist varchar(255) DEFAULT 'N/A'"
                 		+ ")");
             	
+            	stmt.execute("CREATE TABLE Recentlyplayed("
+                		+ "ID INTEGER NOT NULL GENERATED ALWAYS AS IDENTITY (START WITH 1, INCREMENT BY 1),"
+                		+ "File varchar(255)   ,"
+                		+ "Title varchar(255) ,"
+                		+ "InsertDate DATE not null with default current DATE"
+                		+ ")");
+            	
             }
             stmt.close();
         }
@@ -201,6 +215,21 @@ public class DBQuery
             sqlExcept.printStackTrace();
         }
     }
+    
+    public void truncateTableRecentlyPlatyed()
+    {
+        try
+        {
+            stmt = conn.createStatement();
+            stmt.execute("TRUNCATE TABLE Recentlyplayed");
+            stmt.close();
+        }
+        catch (SQLException sqlExcept)
+        {
+            sqlExcept.printStackTrace();
+        }
+    }
+    
     public void deleteSong(String FileName)
     {
     	String Title;
@@ -314,6 +343,33 @@ public class DBQuery
         }
     }
     
+    
+    
+    
+    
+    
+    public void insertSongRecentlyPlayed(String FileName,String Title) throws UnsupportedTagException, InvalidDataException, IOException
+    {
+  
+    	
+    	try
+        {
+            stmt = conn.createStatement();
+            stmt.execute(
+              		"insert into Recentlyplayed values(default,"+
+              				"'"+FileName+"',"+
+              				"'"+Title+"',"+
+              				"default)");     
+
+
+            stmt.close();
+        }
+        catch (SQLException sqlExcept)
+        {
+            sqlExcept.printStackTrace();
+        }
+    }
+    
     public void selectSong()
     {
         try
@@ -414,12 +470,74 @@ public class DBQuery
         }
     }
     
+    
+    
+    
+    public void selectSongFromRecentlyPlayed()
+    {
+        try
+        {
+            stmt = conn.createStatement();
+            results = stmt.executeQuery("select * from Recentlyplayed");
+            ResultSetMetaData rsmd = results.getMetaData();
+            int numberCols = rsmd.getColumnCount();
+            for (int i=1; i<=numberCols; i++)
+            {
+                //print Column Names
+                System.out.print(rsmd.getColumnLabel(i)+"\t\t");  
+            }
+
+            System.out.println("\n-------------------------------------------------");
+
+            while(results.next())
+            {
+                String ID = results.getString(1);
+                String FILE = results.getString(2);
+                String TITLE = results.getString(3);
+                String DATE = results.getString(4);
+                
+                System.out.println(ID + "\t\t" 
+                		+ FILE + "\t\t" 
+                		+TITLE + "\t\t"
+                		+DATE+"\t\t");
+            }
+            results.close();
+            stmt.close();
+        }
+        catch (SQLException sqlExcept)
+        {
+            sqlExcept.printStackTrace();
+        }
+    }
+    
+    
+    
+    
+    
+    
+    
+    
+    
     public void dropTable()
     {
         try
         {
             stmt = conn.createStatement();
             stmt.execute("DROP TABLE Music");
+            stmt.close();
+        }
+        catch (SQLException sqlExcept)
+        {
+            sqlExcept.printStackTrace();
+        }
+    }
+    
+    public void dropTableRecentlyDrop()
+    {
+        try
+        {
+            stmt = conn.createStatement();
+            stmt.execute("DROP TABLE Recentlyplayed");
             stmt.close();
         }
         catch (SQLException sqlExcept)
@@ -559,6 +677,77 @@ public class DBQuery
             sqlExcept.printStackTrace();
         }
     	return stk;
+    }
+    
+    public String[] recentlyPlayedDisplay() 
+    {
+    	String[] stk = null;
+    	try {
+	        stmt = conn.createStatement();
+	        results = stmt.executeQuery("select count(Title) AS rowcount from Recentlyplayed");
+	        int numberRows=0;
+            while (results.next()){
+            	numberRows = results.getInt(1);
+            }
+            if(numberRows>0)
+	        
+            {
+		        results = stmt.executeQuery("select Title from Recentlyplayed");
+		        ResultSetMetaData rsmd = results.getMetaData();
+	
+		        stk = new String[numberRows];
+		        
+		        int t=0;
+		        while(results.next())
+		        {
+		        	stk[t] = results.getString(1);
+		    	    t++;
+		        }
+            }
+    	}
+		
+        catch (SQLException sqlExcept)
+        {
+            sqlExcept.printStackTrace();
+        }
+    	return stk;
+    }
+    
+    public String recentlyPlayedDisplayFileName(String stk) 
+    {
+    	String[] stk1 = null ;
+    	try {
+	        stmt = conn.createStatement();
+	    	
+	        results = stmt.executeQuery("select count(FILE) AS rowcount from Recentlyplayed where TITLE='"+stk+"'");
+	        int numberRows=0;
+            while (results.next()){
+            	
+            	numberRows = results.getInt(1);
+            }
+            if(numberRows>0)
+	        
+            {
+            	
+		        results = stmt.executeQuery("select Distinct File from Recentlyplayed where TITLE='"+stk+"'");
+
+		        stk1 = new String[numberRows];
+		        
+		        int t=0;
+		        while(results.next())
+		        {
+		        	stk1[t] = results.getString(1);
+		    	    t++;
+		        }
+		    	
+            }
+    	}
+		
+        catch (SQLException sqlExcept)
+        {
+            sqlExcept.printStackTrace();
+        }
+    	return stk1[0].toString();
     }
     
     
