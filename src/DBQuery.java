@@ -27,7 +27,7 @@ public class DBQuery
     private static String dbURL ="jdbc:derby:codejava/webdb1;create=true";
    
 
-   /*
+   
     public static void main(String[] args) throws UnsupportedTagException, InvalidDataException, IOException {
     	
     	DBQuery query = new DBQuery();
@@ -39,23 +39,23 @@ public class DBQuery
     	//query.createTable();
     	//query.insertSong("TEST","TEST","TEST","TEST","TEST","1900","1","Library");
     	
-    	//query.selectSongFromRecentlyPlayed();
+    	query.selectSongFromRecentlyPlayed();
     	//String stk =query.recentlyPlayedDisplayFileName("American Idiot");
     	//System.out.println(stk);
     	//int temp = query.getPlaylistCount();
-    	//String[] stk2=query.recentlyPlayedDisplay();
+    	String[] stk2=query.recentlyPlayedDisplay();
     	//System.out.println(temp);
     	//int t=query.checkSong("Give Me Novacaine","TEST1");
     	//System.out.println(t);
-    	//for(int x = 0 ; x < stk2.length ; x++)
-    	//{
-    	//	System.out.println(stk2[x]);
-    	//}
+    	for(int x = 0 ; x < stk2.length ; x++)
+    	{
+    		System.out.println(stk2[x]);
+    	}
     	//query.createTable();
-    	//query.selectSong();
+    	query.selectSong();
     }
    
-    */
+    
     
     public String[] searchSongByTitle(String Title) throws UnsupportedTagException, InvalidDataException, IOException
     {
@@ -692,7 +692,7 @@ public class DBQuery
             if(numberRows>0)
 	        
             {
-		        results = stmt.executeQuery("select Title from Recentlyplayed");
+		        results = stmt.executeQuery("select Title from Recentlyplayed ORDER BY ID DESC FETCH FIRST 10 ROWS ONLY ");
 		        ResultSetMetaData rsmd = results.getMetaData();
 	
 		        stk = new String[numberRows];

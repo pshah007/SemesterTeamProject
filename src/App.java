@@ -184,6 +184,7 @@ public class App {
     static Playlist playlistwindow;
     static int pointerDg = 0;
     static int pointerPs = 0;
+    static int randLast=0;
     ArrayList<Playlist> play = new ArrayList<Playlist>(); // Create an ArrayList object
     
 	   
@@ -353,7 +354,6 @@ public class App {
         
         buttonListener = new ButtonListener();
         Play = new JButton("Play");
-        
         Pause = new JButton("Pause");
         Stop = new JButton("Stop");
         Previous = new JButton("Previous");
@@ -619,10 +619,15 @@ public class App {
 		}
      }
 	    public void pause() throws IOException, BasicPlayerException  {
-	        playControl = 0;
 	        pointerPs = 1;
 	        disablePlay();
 	        player.pause();
+	    }
+	    private void resume() throws BasicPlayerException, IOException {
+	        playControl = 1;
+	        pointerPs = 0;
+	        player.resume();
+	        disablePlay();
 	    }
     
     
@@ -730,20 +735,44 @@ public class App {
             int column = 0;
         	int row = table.getSelectedRow();
             if("Play".equals(e.getActionCommand())){
-            	try {
-            		fin = new FileInputStream(new File(table.getModel().getValueAt(row, column).toString()));
-            		String Title = table.getModel().getValueAt(row, 1).toString();
-            		String Artist = table.getModel().getValueAt(row, 2).toString();
-            		nowPlaying.setText("<html>Now Playing:  &nbsp;&nbsp; <br/>" + Title + "&nbsp;&nbsp;<br/> by &nbsp;&nbsp; <br/>" + Artist + "&nbsp;&nbsp;</html>");
-            	    player.open(new URL("file:///" + table.getModel().getValueAt(row, column).toString()));
-            	    player.play();
-            	} catch (BasicPlayerException | MalformedURLException e1) {
-            	    e1.printStackTrace();
-            	} catch (FileNotFoundException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-            	
+         	   		row = table.getSelectedRow();
+         	   	currentSelectedSong=row;
+         	   	
+         	   	if(Shuffle2.isSelected())
+         	   	{
+         	   		System.out.println("THE SHUFFLE SELECTED "+Shuffle2);
+         	            shuffle();
+         	   	}
+         	   	
+         	   	else
+         	   	{
+   	        	if(row<0)
+   	        	{
+   	        		row=0;
+   	        		currentSelectedSong=row;
+   	        	}
+   	        	
+   	        	try {
+   					mp3file = new Mp3File(table.getModel().getValueAt(row, column).toString());
+   					fin = new FileInputStream(new File(table.getModel().getValueAt(row, column).toString()));
+   					ProgressBarSetup();
+   					lengthOfSongInSeconds = mp3file.getLengthInSeconds();
+   					pointerDg=(int) lengthOfSongInSeconds;
+   					System.out.println("FIN AVALIABLE "+fin.available());
+   					System.out.println("lengthOfSongInSeconds "+lengthOfSongInSeconds);
+   					addSongRecentlyPlayed(table.getModel().getValueAt(row, column).toString());
+   					table.setRowSelectionInterval(currentSelectedSong, currentSelectedSong);
+   	                table.scrollRectToVisible(table.getCellRect(currentSelectedSong, 0, true));
+   					//Play(table.getModel().getValueAt(row, column).toString());
+   					playSong();
+   					//threadStop=1;
+
+   				} catch (UnsupportedTagException | InvalidDataException | IOException e2) {
+   					// TODO Auto-generated catch block
+   					e2.printStackTrace();
+   				}
+           	
+         	   	}
                   
             }
             if("Delete".equals(e.getActionCommand())){
@@ -810,20 +839,31 @@ public class App {
             }
             if(e.getSource()==Pause)
             {
-            	try {
-					pause();
-				} catch (IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (BasicPlayerException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+               	if(!isPaused) {              	
+                	try {
+    					pause();
+    					Pause.setText("Resume");
+    				} catch (BasicPlayerException | IOException e1) {
+    					// TODO Auto-generated catch block
+    					e1.printStackTrace();
+    				}
+            	}
+            	else if(isPaused){
+            		try {
+						resume();
+						Pause.setText("Pause");
+					} catch (BasicPlayerException | IOException e1) {
+						// TODO Auto-generated catch block
+						e1.printStackTrace();
+					}
+            	}
+            	isPaused = !isPaused;
             	
             }
             if("Next".contentEquals(e.getActionCommand()))
             {
-            	stop();
+
+ 
             	if(row==table.getRowCount()-1) {
             		row=0;
             	}
@@ -834,40 +874,51 @@ public class App {
         		nowPlaying.setText("<html>Now Playing: &nbsp;&nbsp;<br/>" + Title + "&nbsp;&nbsp;<br/> by &nbsp;&nbsp;<br/>" + Artist + "&nbsp;&nbsp;</html>");
             	table.changeSelection(row, column, false, false);
             	isPaused = false;
-            	try {
-            		player.open(new URL("file:///" + table.getModel().getValueAt(row, column).toString()));
-            	    player.play();
-				} catch (BasicPlayerException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (MalformedURLException e1) {
+            	table.addRowSelectionInterval(row, row);
+            	currentSelectedSong=row;
+    			table.setRowSelectionInterval(currentSelectedSong, currentSelectedSong);
+                table.scrollRectToVisible(table.getCellRect(currentSelectedSong, 0, true));
+                try {
+					if(!Shuffle2.isSelected())
+					{
+						addSongRecentlyPlayed(table.getModel().getValueAt(row, column).toString());
+					}
+				} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
+                //Play(table.getModel().getValueAt(row, column).toString());
+            	playSong();
             }
             if("Previous".contentEquals(e.getActionCommand()))
             {
-            	stop();
-            	if(row == 0) {
+            	if(row==0 || row<0) {
             		row = table.getRowCount()-1;
             	}
             	else
-            		row = row-1;
+            		
+            		row = row-1;	
             	String Title = table.getModel().getValueAt(row, 1).toString();
         		String Artist = table.getModel().getValueAt(row, 2).toString();
         		nowPlaying.setText("<html>Now Playing: &nbsp;&nbsp;<br/>" + Title + "&nbsp;&nbsp;<br/> by &nbsp;&nbsp;<br/>" + Artist + "&nbsp;&nbsp;</html>");
             	table.changeSelection(row, column, false, false);
             	isPaused = false;
-            	try {
-            		player.open(new URL("file:///" + table.getModel().getValueAt(row, column).toString()));
-            	    player.play();
-				} catch (BasicPlayerException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (MalformedURLException e1) {
+            	table.addRowSelectionInterval(row, row);
+            	currentSelectedSong=row;
+    			table.setRowSelectionInterval(currentSelectedSong, currentSelectedSong);
+                table.scrollRectToVisible(table.getCellRect(currentSelectedSong, 0, true));
+                try {
+					if(!Shuffle2.isSelected())
+					{
+						addSongRecentlyPlayed(table.getModel().getValueAt(row, column).toString());
+					}
+				} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
+            	playSong();
+
+            	
             }
 
             if("Shuffle".contentEquals(e.getActionCommand()))
@@ -888,9 +939,22 @@ public class App {
     	
     	table.clearSelection();
     	row = rand.nextInt((max-min) + 1) + min;
-    	table.addRowSelectionInterval(row, row);
-    	
-    	playSong();
+    	if(randLast==row)
+    	{
+    		while(randLast==row)
+    		{
+    			row = rand.nextInt((max-min) + 1) + min;
+    		}
+    		randLast=row;
+	    	table.addRowSelectionInterval(row, row);
+	    	playSong();
+    	}
+    	else
+    	{
+	    	randLast=row;
+	    	table.addRowSelectionInterval(row, row);
+	    	playSong();
+    	}
     	
     }
     
@@ -1015,12 +1079,13 @@ public class App {
 					pointerDg=(int) lengthOfSongInSeconds;
 					System.out.println("FIN AVALIABLE "+fin.available());
 					System.out.println("lengthOfSongInSeconds "+lengthOfSongInSeconds);
-					addSongRecentlyPlayed(table.getModel().getValueAt(row, column).toString());
+					if(!Shuffle2.isSelected())
+					{
+						addSongRecentlyPlayed(table.getModel().getValueAt(row, column).toString());
+					}
 					table.setRowSelectionInterval(currentSelectedSong, currentSelectedSong);
 	                table.scrollRectToVisible(table.getCellRect(currentSelectedSong, 0, true));
-					Play(table.getModel().getValueAt(row, column).toString());
-					
-					threadStop=1;
+					playSong();
 
 				} catch (UnsupportedTagException | InvalidDataException | IOException e2) {
 					// TODO Auto-generated catch block
@@ -1127,6 +1192,15 @@ public class App {
         	currentSelectedSong=row;
 			table.setRowSelectionInterval(currentSelectedSong, currentSelectedSong);
             table.scrollRectToVisible(table.getCellRect(currentSelectedSong, 0, true));
+            try {
+				if(!Shuffle2.isSelected())
+				{
+					addSongRecentlyPlayed(table.getModel().getValueAt(row, column).toString());
+				}
+			} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
         	playSong();
 
 		
@@ -1158,9 +1232,19 @@ public class App {
         	table.addRowSelectionInterval(row, row);
 
         	currentSelectedSong=row;
-        	playSong();
 			table.setRowSelectionInterval(currentSelectedSong, currentSelectedSong);
             table.scrollRectToVisible(table.getCellRect(currentSelectedSong, 0, true));
+            try {
+				if(!Shuffle2.isSelected())
+				{
+					addSongRecentlyPlayed(table.getModel().getValueAt(row, column).toString());
+				}
+			} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+        	//Play(table.getModel().getValueAt(row, column).toString());
+        	playSong();
         	
          }
     }
@@ -1335,9 +1419,10 @@ public class App {
 
                 }
             }
-
+            
             // Inform that the drop is complete
             event.dropComplete(true);
+            mb.requestFocus();
             playlistwindow.tableRefresh();
         }
 
@@ -1517,6 +1602,12 @@ public class App {
                                  }
                                  System.out.println("SONGS TO BE PLAYED FILE NAME "+menuItem.getText());
                                  Play(Query.recentlyPlayedDisplayFileName(menuItem.getText()));
+                                 try {
+									addSongRecentlyPlayed(Query.recentlyPlayedDisplayFileName(menuItem.getText()));
+								} catch (UnsupportedTagException | InvalidDataException | IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
                                  threadStop=1;
                         	}
                         }
