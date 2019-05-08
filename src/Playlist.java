@@ -21,10 +21,12 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
@@ -38,6 +40,7 @@ import javax.sound.sampled.DataLine;
 import javax.sound.sampled.LineUnavailableException;
 import javax.sound.sampled.SourceDataLine;
 import javax.swing.JButton;
+import javax.swing.JCheckBoxMenuItem;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -47,14 +50,19 @@ import javax.swing.JMenuItem;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
+import javax.swing.JProgressBar;
 import javax.swing.JScrollPane;
 import javax.swing.JSlider;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
+import javax.swing.KeyStroke;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
+import javax.swing.Timer;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.event.MenuEvent;
+import javax.swing.event.MenuListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumn;
 import javax.swing.tree.TreePath;
@@ -63,6 +71,7 @@ import com.mpatric.mp3agic.ID3v1;
 import com.mpatric.mp3agic.InvalidDataException;
 import com.mpatric.mp3agic.Mp3File;
 import com.mpatric.mp3agic.UnsupportedTagException;
+
 
 import javazoom.jlgui.basicplayer.BasicController;
 //import StreamPlayerNew.ButtonListener;
@@ -81,11 +90,11 @@ public class Playlist {
     JPanel bottombtnPn3;
     JPanel bottombtnPnx;
     ButtonListener buttonListener;
-    JSlider volume;
+    static JSlider volume;
     
     JScrollPane scrollPane; 
     int CurrentSelectedRow;
-    JButton Play;
+    static JButton Play;
     JButton Pause;
     JButton Stop;
     JButton Previous;
@@ -104,10 +113,41 @@ public class Playlist {
     static DBQuery Query;
     final JTextArea textArea;
     static boolean isPaused = false;
-    JLabel nowPlaying = new JLabel("");
+    static JLabel nowPlaying = new JLabel("");
     static String playlist;
-
-	
+    static JProgressBar progressBar;
+    static Timer progressTimer ;
+    static long lengthOfSongInSeconds=0;
+    static long progressEverySecond=0;
+    static int pointerPr;
+    static int threadStop=0;
+    static int row =0;
+    static int next = 0;
+    static int stopCheck=0;
+    static int previous = 0; 
+    static int playControl=0;
+    static int  currentSelectedSong = 0;
+    static Playlist playlistwindow;
+    static int pointerDg = 0;
+    static int pointerPs = 0;
+    static int randLast=0;
+    static JLabel tottimeLabel;
+    static JLabel remTimeLabel;
+    static JPanel progressPanel;
+    static JMenu menu2 ;
+    static JMenuItem Play2 ;
+    static JMenuItem Next2 ;
+    static JMenuItem Previous2 ;
+    static JMenu Playrecent2 ;
+    static JMenuItem Currentsongt2 ;
+    static JMenuItem Increasevol2 ;
+    static JMenuItem Decreasevol2 ;
+    static JCheckBoxMenuItem Shuffle2 ;
+    static JCheckBoxMenuItem Repeat2 ;
+	static JPanel mainPanel;
+	static JPanel finalPanel;
+	static FileInputStream fin;
+	static Mp3File mp3file;
     
     /**
      * 
@@ -117,6 +157,8 @@ public class Playlist {
     	playlist = playlistName;
     	playlistWindow = new JFrame(playlist);
     	app = appObj;
+    	finalPanel = new JPanel(new BorderLayout(0, 0));
+    	mainPanel = new JPanel(new BorderLayout(0, 0));
     	/*
     	 * ADDING MENU BAR NAME FILE WHICH WILL CONTAIN NEW,OPEN,EXIT
     	 */
@@ -127,13 +169,41 @@ public class Playlist {
     	JMenuItem Exit = new JMenuItem("Exit");
     	JMenuItem cplay= new JMenuItem("Create Playlist");
     	
+    	
+    	 menu2 = new JMenu("CONTROLS");
+    	 Play2 = new JMenuItem("Play");
+    	 Next2 = new JMenuItem("Next");
+    	 Previous2 = new JMenuItem("Previous");
+    	 
+    	 Playrecent2= new JMenu("Play Recent");
+    	 Currentsongt2= new JMenuItem("Go to  Current Song");
+    	 Increasevol2= new JMenuItem("Increase Volume");
+    	 Decreasevol2= new JMenuItem("Decrease Volume");
+    	 Shuffle2= new JCheckBoxMenuItem("Shuffle");
+    	 Repeat2= new JCheckBoxMenuItem("Repeat");
+
+    	
+    	
+    	
+    	
     	menu.add(New);
     	menu.add(Open);
     	menu.add(cplay);
     	menu.add(Exit);
+    	
+    	menu2.add(Play2);
+    	menu2.add(Next2);
+    	menu2.add(Previous2);
+    	menu2.add(Playrecent2);
+    	menu2.add(Currentsongt2);
+    	menu2.add(Increasevol2);
+    	menu2.add(Decreasevol2);
+    	menu2.add(Shuffle2);
+    	menu2.add(Repeat2);
 
 
     	mb.add(menu);
+    	mb.add(menu2);
     	
     	Exit.addActionListener(new exitJmenuButton());
     	New.addActionListener(new ActionListener() {
@@ -279,6 +349,20 @@ public class Playlist {
         	
         });
         
+        
+        tottimeLabel = new JLabel();
+        remTimeLabel = new JLabel();
+        remTimeLabel.setText("00:00:00");
+        tottimeLabel.setText("00:00:00");
+        progressBar=new JProgressBar();
+     	progressPanel =new JPanel(new BorderLayout());
+     	progressPanel.add(remTimeLabel,BorderLayout.LINE_START);
+     	progressPanel.add(progressBar,BorderLayout.CENTER);
+     	progressPanel.add(tottimeLabel,BorderLayout.LINE_END);
+     	
+        
+        
+        
         bottombtnPnl.add(Play, BorderLayout.CENTER);
         bottombtnPnl.add(Stop, BorderLayout.LINE_START);
         bottombtnPnl.add(Pause, BorderLayout.LINE_END);
@@ -305,19 +389,51 @@ public class Playlist {
 				}
 			}
 		});
-        
-        playlistWindow.add(textArea);
         playlistWindow.setJMenuBar(mb);
+     
+      
+        mainPanel.add(textArea);
         textArea.setText("Drop Songs Here To Add to Playlist : " + playlist);
-        playlistWindow.add(scrollPane, BorderLayout.NORTH);
-        playlistWindow.add(textArea, BorderLayout.CENTER);
-        playlistWindow.add(btnPnl, BorderLayout.SOUTH);
-        playlistWindow.add(nowPlaying, BorderLayout.EAST);
+        mainPanel.add(scrollPane, BorderLayout.NORTH);
+        mainPanel.add(textArea, BorderLayout.CENTER);
+        mainPanel.add(btnPnl, BorderLayout.SOUTH);
+        mainPanel.add(nowPlaying, BorderLayout.EAST);
+        finalPanel.add(progressPanel, BorderLayout.NORTH);
+        finalPanel.add(mainPanel, BorderLayout.CENTER);
+        playlistWindow.add(finalPanel);
+        
+
+    	
+    	Next2.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_RIGHT, java.awt.event.InputEvent.CTRL_MASK));
+    	Next2.addActionListener(new Next2JmenuButton());
+    	
+    	
+    	Previous2.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_LEFT, java.awt.event.InputEvent.CTRL_MASK));
+    	Previous2.addActionListener(new Previous2JmenuButton());
+    	
+    	
+    	Increasevol2.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_I, java.awt.event.InputEvent.CTRL_MASK));
+    	Increasevol2.addActionListener(new Increasevol2JmenuButton());
+
+    	
+    	Decreasevol2.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_D, java.awt.event.InputEvent.CTRL_MASK));
+    	Decreasevol2.addActionListener(new Decreasevol2JmenuButton());
+    	
+    	
+    	Currentsongt2.setAccelerator(javax.swing.KeyStroke.getKeyStroke(java.awt.event.KeyEvent.VK_L, java.awt.event.InputEvent.CTRL_MASK));
+       
+    	Currentsongt2.addActionListener(new Currentsongt2JmenuButton());
+    	Play2.setAccelerator(
+    	         KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
+    	Play2.addActionListener(new Play2JmenuButton());
+        
+        
+        
         playlistWindow.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         playlistWindow.setExtendedState(JFrame.MAXIMIZED_BOTH); 
        // playlistWindow.setUndecorated(true);
         playlistWindow.setVisible(true);
-       
+        mb.requestFocus();
         
         playlistWindow.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
@@ -330,7 +446,7 @@ public class Playlist {
 				}
             }
         });
-        
+  
       
     }
     
@@ -454,49 +570,72 @@ public class Playlist {
 	
 
 
-
     class ButtonListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-            File file=null;
             int column = 0;
         	int row = table.getSelectedRow();
             if("Play".equals(e.getActionCommand())){
-            	try {
-            		String Title = table.getModel().getValueAt(row, 1).toString();
-            		String Artist = table.getModel().getValueAt(row, 2).toString();
-            		nowPlaying.setText("<html>Now Playing:  &nbsp;&nbsp; <br/>" + Title + "&nbsp;&nbsp;<br/> by &nbsp;&nbsp; <br/>" + Artist + "&nbsp;&nbsp;</html>");
-            	    player.open(new URL("file:///" + table.getModel().getValueAt(row, column).toString()));
-            	    player.play();
-            	} catch (BasicPlayerException | MalformedURLException e1) {
-            	    e1.printStackTrace();
-            	}
-            	//testPlay(table.getModel().getValueAt(row, column).toString());
+         	   		row = table.getSelectedRow();
+         	   	currentSelectedSong=row;
+         	   	
+         	   	if(Shuffle2.isSelected())
+         	   	{
+         	   		System.out.println("THE SHUFFLE SELECTED "+Shuffle2);
+         	            shuffle();
+         	   	}
+         	   	
+         	   	else
+         	   	{
+   	        	if(row<0)
+   	        	{
+   	        		row=0;
+   	        		currentSelectedSong=row;
+   	        	}
+   	        	
+   	        	try {
+   					mp3file = new Mp3File(table.getModel().getValueAt(row, column).toString());
+   					fin = new FileInputStream(new File(table.getModel().getValueAt(row, column).toString()));
+   					ProgressBarSetup();
+   					lengthOfSongInSeconds = mp3file.getLengthInSeconds();
+   					pointerDg=(int) lengthOfSongInSeconds;
+   					System.out.println("FIN AVALIABLE "+fin.available());
+   					System.out.println("lengthOfSongInSeconds "+lengthOfSongInSeconds);
+   					addSongRecentlyPlayed(table.getModel().getValueAt(row, column).toString());
+   					table.setRowSelectionInterval(currentSelectedSong, currentSelectedSong);
+   	                table.scrollRectToVisible(table.getCellRect(currentSelectedSong, 0, true));
+   					//Play(table.getModel().getValueAt(row, column).toString());
+   					playSong();
+   					//threadStop=1;
+
+   				} catch (UnsupportedTagException | InvalidDataException | IOException e2) {
+   					// TODO Auto-generated catch block
+   					e2.printStackTrace();
+   				}
+           	
+         	   	}
                   
             }
             if("Delete".equals(e.getActionCommand())){
             	String sk="";
+            	String pl="";
             	int i = table.getSelectedRowCount();
-            	   int[] rows = table.getSelectedRows();
+            	
+            
+            	int rows = table.getSelectedRow();
 
             	if (i >= 0) {
 
-            		System.out.println("THE NUMBER OF ROWS TO DELTE "+i);
-
-            		  for (int row3 = 0; row3<rows.length;row3++) {
-                			sk+= table.getModel().getValueAt(rows[row3], column).toString()+",";
-                			//System.out.println("ROWS FOR "+sk);
-                          }
-              		  sk=sk.substring(0, sk.length()-1);
-              		System.out.println("ROWS FOR "+sk);
-              		  Query.deleteSong(sk);
-              		int numRows = table.getSelectedRows().length;
-              		for(int t=0; t<numRows ; t++ ) {
-
-              		    tableModel.removeRow(table.getSelectedRow());
-              		}
-
-            	} else {
+                			sk= table.getModel().getValueAt(rows, column).toString(); //-+",";
+                			pl= table.getModel().getValueAt(rows, 7).toString(); //",";
+                			System.out.println("THE PLAYLIST NAME TO DELTE "+pl);
+                			Query.deleteSongFromPlaylist(sk,pl);
+              		  		tableModel.removeRow(table.getSelectedRow());
+              		  		;
+            	}
+            	
+            
+            	else {
             	System.out
             	.println("There were issue while Deleting the Row(s).");
             	}
@@ -505,60 +644,33 @@ public class Playlist {
             }
             if("Search".equals(e.getActionCommand()))
             {
-            	isPaused = false;
-            	String[] stk;
-                String name = JOptionPane.showInputDialog(playlistWindow, "What is the name of the song?");//Note: input can be null.
-               // String Title = table.getModel().getValueAt(row, 1).toString();
-        		//String Artist = table.getModel().getValueAt(row, 2).toString();
-        		nowPlaying.setText("");
-        		
-                try {
-					stk=Query.searchSongByTitle(name);
-					System.out.println("The Search Path is  "+stk[0]);
-					
-					nowPlaying.setText("<html>Now Playing: &nbsp;&nbsp;<br/>" + stk[1] + "&nbsp;&nbsp;<br/> by &nbsp;&nbsp;<br/>" + stk[2] + "&nbsp;&nbsp;</html>");
-					
-					
-	            	try {
-	            	    player.open(new URL("file:///" + stk[0]));
-	            	    player.play();
-	            	} catch (BasicPlayerException | MalformedURLException e1) {
-	            	    e1.printStackTrace();
-	            	}
-				} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+            	
                 
             }
             
             if("Stop".contentEquals(e.getActionCommand()))
             {
             	isPaused = false;
-            	nowPlaying.setText("");
-            	try {
-					player.stop();
-				} catch (BasicPlayerException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+            	stop();
+            	
+            	
             }
             if(e.getSource()==Pause)
             {
-            	if(!isPaused) {              	
+               	if(!isPaused) {              	
                 	try {
-    					player.pause();
+    					pause();
     					Pause.setText("Resume");
-    				} catch (BasicPlayerException e1) {
+    				} catch (BasicPlayerException | IOException e1) {
     					// TODO Auto-generated catch block
     					e1.printStackTrace();
     				}
             	}
             	else if(isPaused){
             		try {
-						player.resume();
+						resume();
 						Pause.setText("Pause");
-					} catch (BasicPlayerException e1) {
+					} catch (BasicPlayerException | IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
 					}
@@ -568,6 +680,8 @@ public class Playlist {
             }
             if("Next".contentEquals(e.getActionCommand()))
             {
+
+ 
             	if(row==table.getRowCount()-1) {
             		row=0;
             	}
@@ -578,90 +692,73 @@ public class Playlist {
         		nowPlaying.setText("<html>Now Playing: &nbsp;&nbsp;<br/>" + Title + "&nbsp;&nbsp;<br/> by &nbsp;&nbsp;<br/>" + Artist + "&nbsp;&nbsp;</html>");
             	table.changeSelection(row, column, false, false);
             	isPaused = false;
-            	try {
-            		player.open(new URL("file:///" + table.getModel().getValueAt(row, column).toString()));
-            	    player.play();
-				} catch (BasicPlayerException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (MalformedURLException e1) {
+            	table.addRowSelectionInterval(row, row);
+            	currentSelectedSong=row;
+    			table.setRowSelectionInterval(currentSelectedSong, currentSelectedSong);
+                table.scrollRectToVisible(table.getCellRect(currentSelectedSong, 0, true));
+                try {
+					if(!Shuffle2.isSelected())
+					{
+						addSongRecentlyPlayed(table.getModel().getValueAt(row, column).toString());
+					}
+				} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
+                //Play(table.getModel().getValueAt(row, column).toString());
+            	playSong();
             }
             if("Previous".contentEquals(e.getActionCommand()))
             {
-            	if(row == 0) {
+            	if(row==0 || row<0) {
             		row = table.getRowCount()-1;
             	}
             	else
-            		row = row-1;
+            		
+            		row = row-1;	
             	String Title = table.getModel().getValueAt(row, 1).toString();
         		String Artist = table.getModel().getValueAt(row, 2).toString();
         		nowPlaying.setText("<html>Now Playing: &nbsp;&nbsp;<br/>" + Title + "&nbsp;&nbsp;<br/> by &nbsp;&nbsp;<br/>" + Artist + "&nbsp;&nbsp;</html>");
             	table.changeSelection(row, column, false, false);
             	isPaused = false;
-            	try {
-            		player.open(new URL("file:///" + table.getModel().getValueAt(row, column).toString()));
-            	    player.play();
-				} catch (BasicPlayerException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (MalformedURLException e1) {
+            	table.addRowSelectionInterval(row, row);
+            	currentSelectedSong=row;
+    			table.setRowSelectionInterval(currentSelectedSong, currentSelectedSong);
+                table.scrollRectToVisible(table.getCellRect(currentSelectedSong, 0, true));
+                try {
+					if(!Shuffle2.isSelected())
+					{
+						addSongRecentlyPlayed(table.getModel().getValueAt(row, column).toString());
+					}
+				} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
 					// TODO Auto-generated catch block
 					e1.printStackTrace();
 				}
-            }
-            /*if("Repeat".contentEquals(e.getActionCommand()))
-            {
-            	isPaused = false;
+            	playSong();
+
             	
-            	try {
-            		player.open(new URL("file:///" + table.getModel().getValueAt(row, column).toString()));
-            	    player.play();
-				} catch (BasicPlayerException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (MalformedURLException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
-            }*/
+            }
+
             if("Shuffle".contentEquals(e.getActionCommand()))
             {
-            	isPaused = false;
-            	//calculating a random row number to play a random song
-            	Random rand = new Random();
-            	int min = 0 ;
-            	int max = table.getRowCount();
-            	
-            	//selecting the song and setting label
-            	table.clearSelection();
-            	row = rand.nextInt((max-min) + 1) + min;
-            	table.addRowSelectionInterval(row, row);
-
-            	String Title = table.getModel().getValueAt(row, 1).toString();
-        		String Artist = table.getModel().getValueAt(row, 2).toString();
-        		nowPlaying.setText("<html>Now Playing: &nbsp;&nbsp;<br/>" + Title + "&nbsp;&nbsp;<br/> by &nbsp;&nbsp;<br/>" + Artist + "&nbsp;&nbsp;</html>");
-        		
-            	try {
-            		player.open(new URL("file:///" + table.getModel().getValueAt(row, column).toString()));
-            	    player.play();
-				} catch (BasicPlayerException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				} catch (MalformedURLException e1) {
-					// TODO Auto-generated catch block
-					e1.printStackTrace();
-				}
+            	shuffle();
             }
 
         }
         
     }
-    
    
-    
+    public void pause() throws IOException, BasicPlayerException  {
+        pointerPs = 1;
+        disablePlay();
+        player.pause();
+    }
+    private void resume() throws BasicPlayerException, IOException {
+        playControl = 1;
+        pointerPs = 0;
+        player.resume();
+        disablePlay();
+    }
 
     
     /*
@@ -876,9 +973,436 @@ public class Playlist {
     			}
     			
     		});
+    		
+    		
+    		  
+    		Playrecent2.addMenuListener(new MenuListener() {
+
+                JMenuItem menuItem;
+                public void menuSelected(MenuEvent me) {
+                	Playrecent2.removeAll();//remove previous opened window jmenuitems
+                	String[] data2=	Query.recentlyPlayedDisplay();
+					for(int i=0;i<data2.length;i++)
+					{
+						//System.out.println("index Recently Played:"+ data2[i].toString());
+                        menuItem = new JMenuItem(data2[i]);
+                        Playrecent2.add(menuItem);
+                        menuItem.addActionListener(new ActionListener() {
+                        	public void actionPerformed(ActionEvent arg0) {
+                        		 JMenuItem menuitem=(JMenuItem) arg0.getSource();
+                                 JPopupMenu popupMenu =(JPopupMenu) menuitem.getParent();
+                                 int index= popupMenu.getComponentIndex(menuitem);
+                                 
+                                
+
+                                 for (int c = 0; c < table.getRowCount(); c++) {
+                                	 System.out.println("index: "+table.getModel().getValueAt(c, 1).toString());
+                                	 System.out.println("indexw: "+data2[index].toString());
+                                	 if(data2[index].toString().equals(table.getModel().getValueAt(c, 1).toString()))
+                                	 {
+                                		 currentSelectedSong=c;
+                                		 System.out.println("CURRENTLY "+currentSelectedSong);
+                                		 break;
+                                	 }
+                                	 
+                                   }
+                                 try {
+									addSongRecentlyPlayed(table.getModel().getValueAt(currentSelectedSong, 0).toString());
+								} catch (UnsupportedTagException | InvalidDataException | IOException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
+                         		table.setRowSelectionInterval(currentSelectedSong, currentSelectedSong);
+             	                table.scrollRectToVisible(table.getCellRect(currentSelectedSong, 0, true));
+             					playSong();
+                                 
+                                 
+
+                                 
+                        	}
+                        }
+                        );
+					}
+
+	
+                }
+
+                @Override
+                public void menuDeselected(MenuEvent me) {
+                }
+
+                @Override
+                public void menuCanceled(MenuEvent me) {
+                }
+            });
+    		
+    		
+    		
+    		
     		add(add);
     		add(delete);
     	}
     }
+    
+    static class Next2JmenuButton implements ActionListener
+    {
+        public void actionPerformed(ActionEvent e)
+        {
+
+            int column = 0;
+        	int row = table.getSelectedRow();
+        	if(row==table.getRowCount()-1) {
+        		row=0;
+        	}
+        	else
+        		row = row+1;	
+        	String Title = table.getModel().getValueAt(row, 1).toString();
+    		String Artist = table.getModel().getValueAt(row, 2).toString();
+    		nowPlaying.setText("<html>Now Playing: &nbsp;&nbsp;<br/>" + Title + "&nbsp;&nbsp;<br/> by &nbsp;&nbsp;<br/>" + Artist + "&nbsp;&nbsp;</html>");
+        	table.changeSelection(row, column, false, false);
+        	isPaused = false;
+        	table.addRowSelectionInterval(row, row);
+        	currentSelectedSong=row;
+			table.setRowSelectionInterval(currentSelectedSong, currentSelectedSong);
+            table.scrollRectToVisible(table.getCellRect(currentSelectedSong, 0, true));
+            try {
+				if(!Shuffle2.isSelected())
+				{
+					addSongRecentlyPlayed(table.getModel().getValueAt(row, column).toString());
+				}
+			} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+        	playSong();
+
+		
+         }
+    }
+    public static void playSong() {
+        next = 0;
+        previous = 0;
+            if (threadStop != 0) {
+                stop();
+            }
+            stopCheck = 0;
+
+            currentSelectedSong = table.getSelectedRow(); 
+        	row = table.getSelectedRow();
+        	Play(table.getModel().getValueAt(row, 0).toString());
+            threadStop = 1;
+        
+    }
+    public static void Play(String file2)
+    {
+
+   	try {
+			mp3file = new Mp3File(file2);
+			fin = new FileInputStream(new File(file2));
+			ProgressBarSetup();
+			lengthOfSongInSeconds = mp3file.getLengthInSeconds();
+			pointerDg=(int) lengthOfSongInSeconds;
+			System.out.println("FIN AVALIABLE "+fin.available());
+			System.out.println("lengthOfSongInSeconds "+lengthOfSongInSeconds);
+			progressEverySecond = (fin.available() / lengthOfSongInSeconds);
+		} catch (UnsupportedTagException | InvalidDataException | IOException e2) {
+			// TODO Auto-generated catch block
+			e2.printStackTrace();
+		}
+   	
+       progressTimer = new Timer(1000, new ActionListener() {
+           @Override
+           public void actionPerformed(ActionEvent e) {
+               if (pointerPr < lengthOfSongInSeconds) {
+               	System.out.println("PROGRESS BAR SETUP VALUE "+Math.round(progressEverySecond * pointerPr));
+               	progressBar.setValue(Math.round(progressEverySecond * pointerPr));
+                   if (pointerPs == 0) {
+                       pointerPr++;
+                       pointerDg--;
+                       System.out.println("pointerPr Value "+pointerPr);
+                       System.out.println("pointerDg Value "+pointerDg);
+                       System.out.println("progressEverySecond Value "+progressEverySecond);
+   	                remTimeLabel.setText(getTimeFormat(pointerPr));
+   	                tottimeLabel.setText(getTimeFormat(pointerDg));
+
+                   }
+                       System.out.println("Song progress "+pointerPr+" The Length second "+lengthOfSongInSeconds);
+                       
+                   }
+               else {
+               		stop();
+                       nowPlaying.setText("");
+                       if (Repeat2.isSelected()) {
+                       	
+                       	System.out.println("REPEATE SELECTED pointer progress "+pointerPr);
+                       	playSong();	
+                       } 
+                       
+                       else if (Shuffle2.isSelected()) {
+                           shuffle();
+                           
+                       } 
+                       /*else {
+                           next_Song_ButtonMouseClicked(null);
+                       }
+                       */
+                   
+               }
+               
+               
+           }
+       });
+   	
+       progressTimer.start();
+   	try {
+   		String Title = table.getModel().getValueAt(row, 1).toString();
+   		String Artist = table.getModel().getValueAt(row, 2).toString();
+   		nowPlaying.setText("<html>Now Playing:  &nbsp;&nbsp; <br/>" + Title + "&nbsp;&nbsp;<br/> by &nbsp;&nbsp; <br/>" + Artist + "&nbsp;&nbsp;</html>");
+   	    player.open(new URL("file:///" + file2));
+   	    player.play();
+   	    disablePlay();
+   	} catch (BasicPlayerException  | IOException e1) {
+   	    e1.printStackTrace();
+   	}
+   	
+    }
+    
+    private static void disablePlay() throws IOException {
+
+        Play2.setSelected(false);
+        Play.setSelected(false);
+    }
+    
+    static class Increasevol2JmenuButton implements ActionListener
+    {
+        public void actionPerformed(ActionEvent e)
+        {
+                int volume2 = volume.getValue();
+                if (volume2 > 95) {
+                	volume.setValue(100);
+                } else {
+                	volume.setValue(volume2 + 5);
+                }
+
+
+         }
+    }
+    
+    static class Decreasevol2JmenuButton implements ActionListener
+    {
+        public void actionPerformed(ActionEvent e)
+        {
+        	
+            int volume2 = volume.getValue();
+            if (volume2 < 5) {
+            	volume.setValue(0);
+            } else {
+            	volume.setValue(volume2 - 5);
+            }
+        	
+        	
+
+
+         }
+    }
+    
+    static class Currentsongt2JmenuButton implements ActionListener
+    {
+        public void actionPerformed(ActionEvent e)
+        {
+                table.setRowSelectionInterval(currentSelectedSong, currentSelectedSong);
+                table.scrollRectToVisible(table.getCellRect(currentSelectedSong, 0, true));
+        
+
+         }
+    }
+    
+    
+    private static String getTimeFormat(long seconds) {
+    	int min, sec;
+        String time;
+
+        min = (int) seconds / 60;
+        sec = (int) seconds % 60;
+
+        if (min < 10) {
+            time = "00:0" + Integer.toString(min);
+        } else {
+            time = "00:" + Integer.toString(min);
+        }
+        if (sec < 10) {
+            time = time + ":0" + Integer.toString(sec);
+        } else {
+            time = time + ":" + Integer.toString(sec);
+        }
+        return time;
+    }
+    
+    
+	public static void stop()
+	{
+		isPaused = false;
+    	nowPlaying.setText("");
+    	try {
+    		
+			player.stop();
+			disablePlay();
+            stopCheck = 1;
+            playControl = 0;
+            progressTimer.stop();
+            pointerPr = 0;
+            progressBar.setValue(0);
+            remTimeLabel.setText("00:00:00");
+            tottimeLabel.setText(getTimeFormat(lengthOfSongInSeconds));
+		} catch (BasicPlayerException | IOException e1) {
+			// TODO Auto-generated catch block
+			e1.printStackTrace();
+		}
+	}
+    
+    
+    public static void addSongRecentlyPlayed(String fileName) throws UnsupportedTagException, InvalidDataException, IOException
+    {
+         mp3file = new Mp3File(fileName);
+        String Title =fileName.substring(fileName.lastIndexOf('\\')+1, fileName.length());
+        Title = Title.substring(0,Title.indexOf('.'));
+    	if (mp3file.hasId3v1Tag()) {
+    		  ID3v1 id3v1Tag = mp3file.getId3v1Tag();
+			  System.out.println("Title: " + id3v1Tag.getTitle());
+              Title= id3v1Tag.getTitle(); 		    
+    	}
+
+   		 Query.insertSongRecentlyPlayed(fileName,Title);
+					
+    	
+    }
+
+    static class Previous2JmenuButton implements ActionListener
+    {
+        public void actionPerformed(ActionEvent e)
+        {
+            int column = 0;
+        	int row = table.getSelectedRow();
+        	if(row==0 || row<0) {
+        		row = table.getRowCount()-1;
+        	}
+        	else
+        		
+        		row = row-1;	
+        	String Title = table.getModel().getValueAt(row, 1).toString();
+    		String Artist = table.getModel().getValueAt(row, 2).toString();
+    		nowPlaying.setText("<html>Now Playing: &nbsp;&nbsp;<br/>" + Title + "&nbsp;&nbsp;<br/> by &nbsp;&nbsp;<br/>" + Artist + "&nbsp;&nbsp;</html>");
+        	table.changeSelection(row, column, false, false);
+        	isPaused = false;
+        	table.addRowSelectionInterval(row, row);
+
+        	currentSelectedSong=row;
+			table.setRowSelectionInterval(currentSelectedSong, currentSelectedSong);
+            table.scrollRectToVisible(table.getCellRect(currentSelectedSong, 0, true));
+            try {
+				if(!Shuffle2.isSelected())
+				{
+					addSongRecentlyPlayed(table.getModel().getValueAt(row, column).toString());
+				}
+			} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
+				// TODO Auto-generated catch block
+				e1.printStackTrace();
+			}
+        	//Play(table.getModel().getValueAt(row, column).toString());
+        	playSong();
+        	
+         }
+    }
+    
+    
+    
+    
+    static class Play2JmenuButton implements ActionListener
+    {
+    	  
+        public void actionPerformed(ActionEvent e)
+        {
+        	playControl=1;
+        	 int column = 0;
+      	   		row = table.getSelectedRow();
+      	   	currentSelectedSong=row;
+      	   	
+      	   	if(Shuffle2.isSelected())
+      	   	{
+      	   		System.out.println("THE SHUFFLE SELECTED "+Shuffle2);
+      	            shuffle();
+      	   	}
+      	   	
+      	   	else
+      	   	{
+	        	if(row<0)
+	        	{
+	        		row=0;
+	        		currentSelectedSong=row;
+	        	}
+	        	
+	        	try {
+					mp3file = new Mp3File(table.getModel().getValueAt(row, column).toString());
+					fin = new FileInputStream(new File(table.getModel().getValueAt(row, column).toString()));
+					ProgressBarSetup();
+					lengthOfSongInSeconds = mp3file.getLengthInSeconds();
+					pointerDg=(int) lengthOfSongInSeconds;
+					System.out.println("FIN AVALIABLE "+fin.available());
+					System.out.println("lengthOfSongInSeconds "+lengthOfSongInSeconds);
+					if(!Shuffle2.isSelected())
+					{
+						addSongRecentlyPlayed(table.getModel().getValueAt(row, column).toString());
+					}
+					table.setRowSelectionInterval(currentSelectedSong, currentSelectedSong);
+	                table.scrollRectToVisible(table.getCellRect(currentSelectedSong, 0, true));
+					playSong();
+
+				} catch (UnsupportedTagException | InvalidDataException | IOException e2) {
+					// TODO Auto-generated catch block
+					e2.printStackTrace();
+				}
+        	
+      	   	}
+        	
+         }
+    }
+
+    private static void ProgressBarSetup() throws IOException {
+    	progressBar.setMaximum(fin.available());
+        progressBar.setMinimum(0);
+        
+    }
+    
+    public static void shuffle() {
+    	isPaused = false;
+    	//calculating a random row number to play a random song
+    	Random rand = new Random();
+    	int min = 0 ;
+    	int max = table.getRowCount();
+    	
+    	table.clearSelection();
+    	row = rand.nextInt((max-min) + 1) + min;
+    	if(randLast==row)
+    	{
+    		while(randLast==row)
+    		{
+    			row = rand.nextInt((max-min) + 1) + min;
+    		}
+    		randLast=row;
+	    	table.addRowSelectionInterval(row, row);
+	    	playSong();
+    	}
+    	else
+    	{
+	    	randLast=row;
+	    	table.addRowSelectionInterval(row, row);
+	    	playSong();
+    	}
+    	
+    }
+
+    
+    
+    
     
 }

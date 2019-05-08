@@ -240,9 +240,7 @@ public class App {
     	Play2.setAccelerator(
     	         KeyStroke.getKeyStroke(KeyEvent.VK_SPACE, 0));
     	Play2.addActionListener(new Play2JmenuButton());
-    	//Repeat2.addActionListener(new Repeat2JmenuButton());
-    	//Shuffle2.addActionListener(new Shuffle2JmenuButton());
-    	
+
     	menu2.add(Play2);
     	menu2.add(Next2);
     	menu2.add(Previous2);
@@ -1586,7 +1584,7 @@ public class App {
                 	String[] data2=	Query.recentlyPlayedDisplay();
 					for(int i=0;i<data2.length;i++)
 					{
-						System.out.println("index Recently Played:"+ data2[i].toString());
+						//System.out.println("index Recently Played:"+ data2[i].toString());
                         menuItem = new JMenuItem(data2[i]);
                         Playrecent2.add(menuItem);
                         menuItem.addActionListener(new ActionListener() {
@@ -1595,20 +1593,32 @@ public class App {
                                  JPopupMenu popupMenu =(JPopupMenu) menuitem.getParent();
                                  int index= popupMenu.getComponentIndex(menuitem);
                                  
-                                 System.out.println("index:"+ data2[index].toString());
-                                 if(threadStop!=0)
-                                 {
-                                	 stop();
-                                 }
-                                 System.out.println("SONGS TO BE PLAYED FILE NAME "+menuItem.getText());
-                                 Play(Query.recentlyPlayedDisplayFileName(menuItem.getText()));
+                                
+
+                                 for (int c = 0; c < table.getRowCount(); c++) {
+                                	 System.out.println("index: "+table.getModel().getValueAt(c, 1).toString());
+                                	 System.out.println("indexw: "+data2[index].toString());
+                                	 if(data2[index].toString().equals(table.getModel().getValueAt(c, 1).toString()))
+                                	 {
+                                		 currentSelectedSong=c;
+                                		 System.out.println("CURRENTLY "+currentSelectedSong);
+                                		 break;
+                                	 }
+                                	 
+                                   }
                                  try {
-									addSongRecentlyPlayed(Query.recentlyPlayedDisplayFileName(menuItem.getText()));
+									addSongRecentlyPlayed(table.getModel().getValueAt(currentSelectedSong, 0).toString());
 								} catch (UnsupportedTagException | InvalidDataException | IOException e) {
 									// TODO Auto-generated catch block
 									e.printStackTrace();
 								}
-                                 threadStop=1;
+                         		table.setRowSelectionInterval(currentSelectedSong, currentSelectedSong);
+             	                table.scrollRectToVisible(table.getCellRect(currentSelectedSong, 0, true));
+             					playSong();
+                                 
+                                 
+
+                                 
                         	}
                         }
                         );
