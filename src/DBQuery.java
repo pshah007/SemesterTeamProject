@@ -1,4 +1,5 @@
 import java.io.IOException;
+import java.sql.Array;
 import java.sql.Connection;
 import java.sql.DatabaseMetaData;
 import java.sql.DriverManager;
@@ -32,27 +33,32 @@ public class DBQuery
     	
     	DBQuery query = new DBQuery();
     	
-    	query.createConnection();
+    	//query.createConnection();
     	
+    	//query.getColumnsStatuses();
+    	
+    	//query.getColumnsStatuses();
+    	//query.createTable();
+    	//query.insertFirstColumnStatus();
     	//query.dropTable();
     	//query.dropTableRecentlyDrop();
     	//query.createTable();
     	//query.insertSong("TEST","TEST","TEST","TEST","TEST","1900","1","Library");
     	
-    	query.selectSongFromRecentlyPlayed();
+    	//query.selectSongFromRecentlyPlayed();
     	//String stk =query.recentlyPlayedDisplayFileName("American Idiot");
     	//System.out.println(stk);
     	//int temp = query.getPlaylistCount();
-    	String[] stk2=query.recentlyPlayedDisplay();
+    	//String[] stk2=query.recentlyPlayedDisplay();
     	//System.out.println(temp);
     	//int t=query.checkSong("Give Me Novacaine","TEST1");
     	//System.out.println(t);
-    	for(int x = 0 ; x < stk2.length ; x++)
+    	/*for(int x = 0 ; x < stk2.length ; x++)
     	{
     		System.out.println(stk2[x]);
-    	}
+    	}*/
     	//query.createTable();
-    	query.selectSong();
+    	//query.selectSong();
     }
    
     
@@ -177,7 +183,10 @@ public class DBQuery
                 		+ "InsertDate DATE not null with default current DATE"
                 		+ ")");
             	
+            	
+            	
             }
+       
             stmt.close();
         }
         catch (SQLException sqlExcept)
@@ -338,6 +347,27 @@ public class DBQuery
             stmt.close();
         }
         catch (SQLException sqlExcept)
+        {
+            sqlExcept.printStackTrace();
+        }
+    }
+    
+    public void insertFirstColumnStatus() {
+    	try {
+    		stmt = conn.createStatement();
+    		//String status = "Active";
+    		
+    		//stmt.execute("DROP TABLE Headers");
+    	    
+    	     
+    	    // stmt.execute("CREATE TABLE Headers(File varchar(255), Title varchar(255), Artist varchar(255), Album varchar(255), Genere varchar(255), Yr varchar(255), Length varchar(255), PlaylistHeader varchar(255))");
+    		
+    		
+    		stmt.execute("insert into Headers values('Active', 'Active', 'Active', 'Active', 'Active', 'Active', 'Active', 'Active')");
+    		System.out.println("First Column Header Status Added");
+    		stmt.close();
+    	}
+    	  catch (SQLException sqlExcept)
         {
             sqlExcept.printStackTrace();
         }
@@ -750,6 +780,48 @@ public class DBQuery
     	return stk1[0].toString();
     }
     
+    
+    public String[] getColumnsStatuses() {
+    	
+    	String statuses[] = new String[9];
+    	try {
+			stmt = conn.createStatement();
+	
+			results = stmt.executeQuery("SELECT * FROM Headers");
+			
+			while(results.next()) {
+	    		for(int i=0; i<8; i++) {
+	    			
+	    			statuses[i] = results.getString(i+1);
+	    		}
+	    	}
+			
+    	}
+		 catch (SQLException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    
+    	//for(int i=0; i<statuses.length; i++)
+    	//	System.out.println(statuses[i]);
+    	return statuses;
+    	
+    }
+    
+    public void setHeaderStatus(String columnName, String columnStatus) {
+    	
+    	try {
+    		stmt = conn.createStatement();
+    		String sql = "UPDATE Headers SET " +columnName+ " = '" +columnStatus+ "' WHERE " +columnName+ " <> ''";
+    		//System.out.println(sql);
+    		stmt.execute(sql );
+    		//System.out.println("Donbe");
+    	}
+    	 catch (SQLException e) {
+ 			// TODO Auto-generated catch block
+ 			e.printStackTrace();
+ 		}
+    }
     
     
 }

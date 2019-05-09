@@ -21,6 +21,8 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
@@ -64,6 +66,7 @@ import javax.swing.event.ChangeListener;
 import javax.swing.event.MenuEvent;
 import javax.swing.event.MenuListener;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
 import javax.swing.tree.TreePath;
 
@@ -148,7 +151,18 @@ public class Playlist {
 	static JPanel finalPanel;
 	static FileInputStream fin;
 	static Mp3File mp3file;
+	static JPopupMenu headerPopup; //for table headers
     
+    //the jmenucheckboxes for headerpopup
+	 static JCheckBoxMenuItem filehead ;
+	 static JCheckBoxMenuItem titlehead ;
+	 static JCheckBoxMenuItem artist ;
+	 static JCheckBoxMenuItem album ;
+	 static JCheckBoxMenuItem genere;
+	 static JCheckBoxMenuItem year;
+	 static JCheckBoxMenuItem length;
+	 static JCheckBoxMenuItem playlistHeader;
+     static JCheckBoxMenuItem arrOfCheckBoxes[] = new JCheckBoxMenuItem[8];
     /**
      * 
      */
@@ -289,7 +303,199 @@ public class Playlist {
           table.setAutoCreateRowSorter(true); //adding the sorting functionality on all columns
           
           /*hiding File column*/
-          table.getColumnModel().removeColumn(table.getColumnModel().getColumn(0));
+          table.getColumnModel().getColumn(0).setWidth(0);
+          table.getColumnModel().getColumn(0).setMinWidth(0);
+          table.getColumnModel().getColumn(0).setMaxWidth(0);
+         
+          
+          JCheckBoxMenuItem artist = new JCheckBoxMenuItem("Artist");
+     	 JCheckBoxMenuItem album = new JCheckBoxMenuItem("album");
+     	 JCheckBoxMenuItem genere = new JCheckBoxMenuItem("Genere");
+     	 JCheckBoxMenuItem year = new JCheckBoxMenuItem("Year");
+     	 JCheckBoxMenuItem length = new JCheckBoxMenuItem("Length");
+     	 JCheckBoxMenuItem playlistHeader = new JCheckBoxMenuItem("Playlist");
+     	 headerPopup = new JPopupMenu();
+     	
+     	 
+     	 headerPopup.add(artist);
+     	 headerPopup.add(album);
+     	 headerPopup.add(genere);
+     	 headerPopup.add(year);
+     	 headerPopup.add(length);
+     	 headerPopup.add(playlistHeader);
+     	 
+     	 arrOfCheckBoxes[0] = filehead;
+     	 arrOfCheckBoxes[1] = titlehead;
+     	 arrOfCheckBoxes[2] = artist;
+     	 arrOfCheckBoxes[3] = album;
+     	 arrOfCheckBoxes[4] = genere;
+     	 arrOfCheckBoxes[5] = year;
+     	 arrOfCheckBoxes[6] = length;
+     	 arrOfCheckBoxes[7] = playlistHeader;
+          
+     	 
+     	 
+     	 
+          //assigning item listener to all table header checkboxes          
+          artist.addItemListener(new ItemListener() {
+  			@Override
+  			public void itemStateChanged(ItemEvent e) {
+  				// TODO Auto-generated method stub
+  				if(e.getStateChange() == ItemEvent.DESELECTED) {
+  					//table.getColumnModel().removeColumn(table.getColumnModel().getColumn(0));
+  					table.getColumnModel().getColumn(2).setWidth(0);
+  					table.getColumnModel().getColumn(2).setMinWidth(0);
+  					table.getColumnModel().getColumn(2).setMaxWidth(0);
+  					table.getColumnModel().getColumn(2).setPreferredWidth(0);
+  					Query.setHeaderStatus("Artist", "Inactive");
+  					App.selectColumnVisibilty();
+  				}
+  				else if(e.getStateChange() == ItemEvent.SELECTED){
+  					table.getColumnModel().getColumn(2).setWidth(150);
+  					table.getColumnModel().getColumn(2).setMinWidth(150);
+  					table.getColumnModel().getColumn(2).setMaxWidth(150);
+  					table.getColumnModel().getColumn(2).setPreferredWidth(150);
+  					Query.setHeaderStatus("Artist", "Active");
+  					App.selectColumnVisibilty();
+  				}
+  				
+  			}
+            });
+          
+          album.addItemListener(new ItemListener() {
+    			@Override
+    			public void itemStateChanged(ItemEvent e) {
+    				// TODO Auto-generated method stub
+    				if(e.getStateChange() == ItemEvent.DESELECTED) {
+    					//table.getColumnModel().removeColumn(table.getColumnModel().getColumn(0));
+    					table.getColumnModel().getColumn(3).setWidth(0);
+    					table.getColumnModel().getColumn(3).setMinWidth(0);
+    					table.getColumnModel().getColumn(3).setMaxWidth(0);
+    					table.getColumnModel().getColumn(3).setPreferredWidth(0);
+    					Query.setHeaderStatus("Album", "Inactive");
+    					App.selectColumnVisibilty();
+    				}
+    				else if(e.getStateChange() == ItemEvent.SELECTED){
+    					table.getColumnModel().getColumn(3).setWidth(150);
+    					table.getColumnModel().getColumn(3).setMinWidth(150);
+    					table.getColumnModel().getColumn(3).setMaxWidth(150);
+    					table.getColumnModel().getColumn(3).setPreferredWidth(150);
+    					Query.setHeaderStatus("Album", "Active");
+    					App.selectColumnVisibilty();
+    				}
+    				
+    			}
+              });
+          
+          genere.addItemListener(new ItemListener() {
+  			@Override
+  			public void itemStateChanged(ItemEvent e) {
+  				// TODO Auto-generated method stub
+  				if(e.getStateChange() == ItemEvent.DESELECTED) {
+  					//table.getColumnModel().removeColumn(table.getColumnModel().getColumn(0));
+  					table.getColumnModel().getColumn(4).setWidth(0);
+  					table.getColumnModel().getColumn(4).setMinWidth(0);
+  					table.getColumnModel().getColumn(4).setMaxWidth(0);
+  					table.getColumnModel().getColumn(4).setPreferredWidth(0);
+  					Query.setHeaderStatus("Genere", "Inactive");
+  					App.selectColumnVisibilty();
+  				}
+  				else if(e.getStateChange() == ItemEvent.SELECTED){
+  					table.getColumnModel().getColumn(4).setWidth(150);
+  					table.getColumnModel().getColumn(4).setMinWidth(150);
+  					table.getColumnModel().getColumn(4).setMaxWidth(150);
+  					table.getColumnModel().getColumn(4).setPreferredWidth(150);
+  					Query.setHeaderStatus("Genere", "Active");
+  					App.selectColumnVisibilty();
+  				}
+  				
+  			}
+            });
+          
+          year.addItemListener(new ItemListener() {
+    			@Override
+    			public void itemStateChanged(ItemEvent e) {
+    				// TODO Auto-generated method stub
+    				if(e.getStateChange() == ItemEvent.DESELECTED) {
+    					//table.getColumnModel().removeColumn(table.getColumnModel().getColumn(0));
+    					table.getColumnModel().getColumn(5).setWidth(0);
+    					table.getColumnModel().getColumn(5).setMinWidth(0);
+    					table.getColumnModel().getColumn(5).setMaxWidth(0);
+    					table.getColumnModel().getColumn(5).setPreferredWidth(0);
+    					Query.setHeaderStatus("Yr", "Inactive");
+    					App.selectColumnVisibilty();
+    				}
+    				else if(e.getStateChange() == ItemEvent.SELECTED){
+    					table.getColumnModel().getColumn(5).setWidth(150);
+    					table.getColumnModel().getColumn(5).setMinWidth(150);
+    					table.getColumnModel().getColumn(5).setMaxWidth(150);
+    					table.getColumnModel().getColumn(5).setPreferredWidth(150);
+    					Query.setHeaderStatus("Yr", "Active");
+    					App.selectColumnVisibilty();
+    				}
+    				
+    			}
+              });
+          
+          length.addItemListener(new ItemListener() {
+  			@Override
+  			public void itemStateChanged(ItemEvent e) {
+  				// TODO Auto-generated method stub
+  				if(e.getStateChange() == ItemEvent.DESELECTED) {
+  					//table.getColumnModel().removeColumn(table.getColumnModel().getColumn(0));
+  					table.getColumnModel().getColumn(6).setWidth(0);
+  					table.getColumnModel().getColumn(6).setMinWidth(0);
+  					table.getColumnModel().getColumn(6).setMaxWidth(0);
+  					table.getColumnModel().getColumn(6).setPreferredWidth(0);
+  					Query.setHeaderStatus("Length", "Inactive");
+  					App.selectColumnVisibilty();
+  				}
+  				else if(e.getStateChange() == ItemEvent.SELECTED){
+  					table.getColumnModel().getColumn(6).setWidth(150);
+  					table.getColumnModel().getColumn(6).setMinWidth(150);
+  					table.getColumnModel().getColumn(6).setMaxWidth(150);
+  					table.getColumnModel().getColumn(6).setPreferredWidth(150);
+  					Query.setHeaderStatus("Length", "Active");
+  					App.selectColumnVisibilty();
+  				}
+  				
+  			}
+            });
+          
+          playlistHeader.addItemListener(new ItemListener() {
+    			@Override
+    			public void itemStateChanged(ItemEvent e) {
+    				// TODO Auto-generated method stub
+    				if(e.getStateChange() == ItemEvent.DESELECTED) {
+    					//table.getColumnModel().removeColumn(table.getColumnModel().getColumn(0));
+    					table.getColumnModel().getColumn(7).setWidth(0);
+    					table.getColumnModel().getColumn(7).setMinWidth(0);
+    					table.getColumnModel().getColumn(7).setMaxWidth(0);
+    					table.getColumnModel().getColumn(7).setPreferredWidth(0);
+    					Query.setHeaderStatus("PlaylistHeader", "Inactive");
+    					App.selectColumnVisibilty();
+    				}
+    				else if(e.getStateChange() == ItemEvent.SELECTED){
+    					table.getColumnModel().getColumn(7).setWidth(150);
+    					table.getColumnModel().getColumn(7).setMinWidth(150);
+    					table.getColumnModel().getColumn(7).setMaxWidth(150);
+    					table.getColumnModel().getColumn(7).setPreferredWidth(150);
+    					Query.setHeaderStatus("PlaylistHeader", "Active");
+    					App.selectColumnVisibilty();
+    				}
+    				
+    			}
+              });
+          
+          
+          //adding the mouselisteionier on jtable header
+          final JTableHeader header = table.getTableHeader();
+          header.addMouseListener(new MouseAdapter() {
+             public void mouseClicked(MouseEvent me) {
+                if (SwingUtilities.isRightMouseButton(me))
+                   headerPopup.show(header, me.getX(), me.getY());
+             }
+          });
           
           MouseListener mouseListener = new MouseAdapter() {
               //this will print the selected row index when a user clicks the table
@@ -434,6 +640,8 @@ public class Playlist {
        // playlistWindow.setUndecorated(true);
         playlistWindow.setVisible(true);
         mb.requestFocus();
+     // if(Playlist.this != null)
+    	Playlist.selectColumnVisibilty();
         
         playlistWindow.addWindowListener(new java.awt.event.WindowAdapter() {
             @Override
@@ -1402,7 +1610,36 @@ public class Playlist {
     }
 
     
-    
+    public static void selectColumnVisibilty() {
+    	
+    	String[] columnStatuses = Query.getColumnsStatuses();
+    	for(int i=2; i<=7; i++)
+    	System.out.println(columnStatuses[i]);
+    	
+    	for(int i=2; i<=7; i++) {
+    		
+    		if(columnStatuses[i].equals("Inactive")) {
+    			System.out.println("here inactive");
+    			table.getColumnModel().getColumn(i).setWidth(0);
+				table.getColumnModel().getColumn(i).setMinWidth(0);
+				table.getColumnModel().getColumn(i).setMaxWidth(0);
+				table.getColumnModel().getColumn(i).setPreferredWidth(0);
+				arrOfCheckBoxes[i].setSelected(false);
+				
+    		}
+    		if(columnStatuses[i].equals("Active")) {
+    			System.out.println("here active");
+    			table.getColumnModel().getColumn(i).setWidth(150);
+				table.getColumnModel().getColumn(i).setMinWidth(150);
+				table.getColumnModel().getColumn(i).setMaxWidth(150);
+				table.getColumnModel().getColumn(i).setPreferredWidth(150);
+				arrOfCheckBoxes[i].setSelected(true);
+    		}
+    		
+    		
+    	}
+    	
+    }
     
     
 }

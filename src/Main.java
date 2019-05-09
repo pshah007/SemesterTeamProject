@@ -7,9 +7,9 @@ public class Main {
 		//StreamPlayerNew gui = new StreamPlayerNew();
 		//gui.setVisible(true);
 	
-		  App app = new App();
+		 App app = new App();
 	        
-	        app.go();
+	       app.go();
 		
 	        
 	}
