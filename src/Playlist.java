@@ -9,6 +9,7 @@
 import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.awt.Toolkit;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 import java.awt.datatransfer.DataFlavor;
@@ -58,6 +59,8 @@ import javax.swing.JSlider;
 import javax.swing.JTable;
 import javax.swing.JTextArea;
 import javax.swing.KeyStroke;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -68,6 +71,8 @@ import javax.swing.event.MenuListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import javax.swing.tree.TreePath;
 
 import com.mpatric.mp3agic.ID3v1;
@@ -163,6 +168,9 @@ public class Playlist {
 	 static JCheckBoxMenuItem length;
 	 static JCheckBoxMenuItem playlistHeader;
      static JCheckBoxMenuItem arrOfCheckBoxes[] = new JCheckBoxMenuItem[8];
+     static  TableRowSorter<TableModel> sorter;
+     
+     static List<RowSorter.SortKey> sortKeys;
     /**
      * 
      */
@@ -235,6 +243,7 @@ public class Playlist {
 	            		   addSong(file.getPath(), "Library");
 						addSong(file.getPath(), playlist);
 						Playlist.this.app.tableRefresh();
+						sorter.sort();
 					} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
 						// TODO Auto-generated catch block
 						e1.printStackTrace();
@@ -301,7 +310,9 @@ public class Playlist {
           
           
           table.setAutoCreateRowSorter(true); //adding the sorting functionality on all columns
-          
+          sorter = new TableRowSorter<>(table.getModel());
+      	  sortKeys = new ArrayList<>();
+      	
           /*hiding File column*/
           table.getColumnModel().getColumn(0).setWidth(0);
           table.getColumnModel().getColumn(0).setMinWidth(0);
@@ -496,6 +507,11 @@ public class Playlist {
                    headerPopup.show(header, me.getX(), me.getY());
              }
           });
+          
+          
+          table.setRowSorter(sorter);
+          sortKeys.add(new RowSorter.SortKey(1, SortOrder.ASCENDING));
+          sorter.setSortKeys(sortKeys);
           
           MouseListener mouseListener = new MouseAdapter() {
               //this will print the selected row index when a user clicks the table
@@ -1063,6 +1079,7 @@ public class Playlist {
                             // Print out the file path
                         	addSong(file1.getPath(), "Library");
                         	addSong(file1.getPath(), playlist);
+                        	 sorter.sort();
                         	Stk+=file1.getPath()+"\n";
                         	textArea.setText(Stk);
                             System.out.println("File path is '" + file1.getPath() + "'.");
@@ -1077,6 +1094,7 @@ public class Playlist {
                           System.out.println(filepath);
                           addSong(filepath, "Library");
                           addSong(filepath, playlist);
+                          sorter.sort();
                           break;
                     }
                    
@@ -1133,7 +1151,9 @@ public class Playlist {
 		            	   try {
 		            		   addSong(file.getPath(), "Library");
 							addSong(file.getPath(), playlist);
+							 
 							Playlist.this.app.tableRefresh();
+							sorter.sort();
 						} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
 							// TODO Auto-generated catch block
 							e1.printStackTrace();

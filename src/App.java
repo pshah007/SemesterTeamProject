@@ -72,6 +72,8 @@ import javax.swing.KeyStroke;
 import javax.swing.ListSelectionModel;
 import javax.swing.MenuElement;
 import javax.swing.MenuSelectionManager;
+import javax.swing.RowSorter;
+import javax.swing.SortOrder;
 import javax.swing.SwingConstants;
 import javax.swing.SwingUtilities;
 import javax.swing.Timer;
@@ -85,6 +87,8 @@ import javax.swing.event.TreeSelectionListener;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.JTableHeader;
 import javax.swing.table.TableColumn;
+import javax.swing.table.TableModel;
+import javax.swing.table.TableRowSorter;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.swing.tree.MutableTreeNode;
@@ -201,11 +205,18 @@ public class App {
 	 static JCheckBoxMenuItem length;
 	 static JCheckBoxMenuItem playlistHeader;
      static JCheckBoxMenuItem arrOfCheckBoxes[] = new JCheckBoxMenuItem[8];
+     
+     
+    static  TableRowSorter<TableModel> sorter;
+    
+     static List<RowSorter.SortKey> sortKeys;
 	   
 	    
 
     public App(){
     	
+    	
+    
     	/*
     	 * ADDING MENU BAR NAME FILE WHICH WILL CONTAIN NEW,OPEN,EXIT
     	 */
@@ -359,7 +370,8 @@ public class App {
           table.setDragEnabled(true);
           
           table.setAutoCreateRowSorter(true); //adding the sorting functionality on all columns
-          
+	      sorter = new TableRowSorter<>(table.getModel());
+	      sortKeys = new ArrayList<>();
           /*hiding File column*/
          table.getColumnModel().getColumn(0).setWidth(0);
          table.getColumnModel().getColumn(0).setMinWidth(0);
@@ -552,7 +564,9 @@ public class App {
               });
           
           
-          
+          table.setRowSorter(sorter);
+          sortKeys.add(new RowSorter.SortKey(1, SortOrder.ASCENDING));
+          sorter.setSortKeys(sortKeys);
           
         //assign the listener
         table.addMouseListener(mouseListener);
@@ -1514,11 +1528,13 @@ public class App {
             		   if(stk=="" || stk ==" " || stk.equals("Library"))
             		   {
             			   addSong(file.getPath(),"Library");
+            			   sorter.sort();
             		   }
             		   else
             		   {
             			   addSong(file.getPath(),"Library");
             			   addSong(file.getPath(),stk);
+            			   sorter.sort();
             		   }
 					
 					
@@ -1629,12 +1645,14 @@ public class App {
                         		   {
                             	 
                         			   addSong(file1.getPath(),"Library");
+                        			   sorter.sort();
                         		   }
                         		   else
                         		   {
                         			
                         			   addSong(file1.getPath(),"Library");
                         			   addSong(file1.getPath(),stk);
+                        			   sorter.sort();
                         		   }
 
 
@@ -1653,6 +1671,9 @@ public class App {
             // Inform that the drop is complete
             event.dropComplete(true);
             mb.requestFocus();
+         
+            sorter.sort();
+            //table.getRowSorter().toggleSortOrder(1);
             playlistwindow.tableRefresh();
         }
 
@@ -1704,10 +1725,12 @@ public class App {
 		            	   try {
 		            		   if(stk.equals("Library")) {
 		            			   addSong(file.getPath(),"Library");
+		            			   sorter.sort();
 		            		   }
 		            		   else {
 		            			   addSong(file.getPath(),"Library");
 		            			   addSong(file.getPath(), stk);
+		            			   sorter.sort();
 		            		   }
 							
 						} catch (UnsupportedTagException | InvalidDataException | IOException e1) {
@@ -1888,6 +1911,7 @@ public class App {
                                  System.out.println("index:"+ data2[index].toString());
                            	  try {
         							addSong(table.getModel().getValueAt(table.getSelectedRow(), 0).toString(),data2[index].toString());
+        							sorter.sort();
         							if(playlistwindow!=null)
         							{
         								playlistwindow.tableRefresh();
